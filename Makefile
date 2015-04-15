@@ -1,5 +1,6 @@
 TARGET = smpor
 
+CC = gcc
 CXX = g++
 LINKER = g++ -o
 DEBUG = -g
@@ -15,11 +16,13 @@ OBJDIR = obj
 # INCLUDES = $(SRCDIR)/*.h
 # OBJECTS = $(OBJDIR)/*.o
 
-SOURCES  := $(wildcard $(SRCDIR)/*.cpp)
+SOURCES  := $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*.c)
 INCLUDES := $(wildcard $(SRCDIR)/*.h)
 OBJECTS  := $(SOURCES:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
 
 # $(TARGET): $(OBJS)
+
+
 
 $(OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.cpp
 	@$(CXX) $(CFLAGS) $< -o $@
@@ -31,9 +34,9 @@ $(OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.cpp
 # 	$(CXX) $(CFLAGS) src/main.cpp
 
 $(TARGET): $(OBJECTS)
-	@$(LINKER) $@ $(LFLAGS) $(OBJECTS)
+	@$(LINKER) $@ $(LFLAGS) $(OBJECTS) 
 	# $(CXX) graph.o main.o $(LFLAGS) -o smpor
 
 .PHONY: clean
 clean:
-	rm *.o $(TARGET)
+	rm $(OBJDIR)/*.o $(TARGET)

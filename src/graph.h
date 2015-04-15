@@ -1,5 +1,8 @@
 /*
  * Declare simple graph structure
+ * Assume the graph is
+ *   1. simple
+ *   2. undirected
  */
 #ifndef GRAPH_H
 #define GRAPH_H
@@ -31,6 +34,7 @@ class Graph
         void add_edge(VtxType u, VtxType v, WgtType wgt);
         std::vector<DistType> adj(VtxType s);
         int get_num_vtxs();
+        void print_graph();
 };
 
 #endif
