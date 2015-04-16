@@ -48,10 +48,20 @@ int Graph::get_num_vtxs()
 /*****************************************
  * get the neighbors of the given vertex *
  *****************************************/
-std::vector<DistType> Graph::adj(VtxType s)
+std::vector<VtxType> Graph::adj(VtxType s)
 {
     return vtxs.at(s).edges;
 }
+
+
+/*************************************************
+ * get the neighbors' weight of the given vertex *
+ *************************************************/
+std::vector<WgtType> Graph::adj_wgts(VtxType s)
+{
+    return vtxs.at(s).pWgts;
+}
+
 
 
 /******************

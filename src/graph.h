@@ -32,7 +32,8 @@ class Graph
         Graph(VtxType nNodes);
         ~Graph();
         void add_edge(VtxType u, VtxType v, WgtType wgt);
-        std::vector<DistType> adj(VtxType s);
+        std::vector<VtxType> adj(VtxType s);
+        std::vector<WgtType> adj_wgts(VtxType s);
         int get_num_vtxs();
         void print_graph();
 };

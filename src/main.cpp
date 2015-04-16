@@ -6,6 +6,7 @@
 
 
 #include "load_graph.h"
+#include "partition.h"
 
 int main(int argc, char** argv)
 {
@@ -17,11 +18,15 @@ int main(int argc, char** argv)
 
 
     /* Code to measure the elapsed time */
+    /* Load the Graph*/
     Graph g(0);
     load_graph_from_mm(argv[1], g);
     g.print_graph();
 
     std::cout << "number of vertices = " << g.get_num_vtxs() << std::endl;
+    /* Partition the Graph */
+    std::vector<int> partition;
+    partition_graph(g, partition, 4);
 
 
 
