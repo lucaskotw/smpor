@@ -505,6 +505,18 @@ void kl_bisection(CGraph::CGraph& coarsetCG, \
         }
     } while (diff_max > 0);
 
+    // assign those belong to next partition
+    for (int i=part_order.size()/2; i<part_order.size(); ++i)
+    {
+        for (int vi=0; vi<coarsetPartition.size(); ++vi)
+        {
+            if (part_order.at(i) == vi)
+            {
+                coarsetPartition.at(vi) = nextPartID;
+            }
+        }
+    }
+
 }
 
 
@@ -516,18 +528,36 @@ int partitioning_phase(CGraph::CGraph& coarsetCG, \
     std::fill(coarsetPartition.begin(), coarsetPartition.end(), 0);
     int next_part_idx = 0;
 
-    // // examine whether the number of vertices in current partition exceeding the
-    // // expected number (= n/k, where k is partition number)
-    // for (int p=0; p<partNum; ++p)
-    // {
-    //     while (is_partition_num_exceed(coarset_partition, p, partNum))
-    //     {
-    //         std::cout << "now work on partition " << p << " to " << p+1 << std::endl;
-    //         kl_bisection(coarestCG, coarset_partition, p, ++next_part_idx);
+    // examine whether the number of vertices in current partition exceeding the
+    // expected number (= n/k, where k is partition number)
+    for (int p=0; p<partNum; ++p)
+    {
+        while (is_partition_num_exceed(coarsetPartition, p, partNum))
+        {
+            
+            kl_bisection(coarsetCG, coarsetPartition, p, ++next_part_idx);
+            std::cout << "work on partition " << p << " to " << next_part_idx << std::endl;
+            std::cout << "current coarset partition" << std::endl;
+            for (std::vector<VtxType>::iterator it=coarsetPartition.begin(); \
+                it!=coarsetPartition.end();\
+                ++it)
+            {
+                std::cout << (*it) << " ";
+            }
+            std::cout << std::endl;
 
-    //     }
+        }
+
+    }
+    // kl_bisection(coarsetCG, coarsetPartition, 0, 1);
+    // std::cout << "current coarset partition" << std::endl;
+    // for (std::vector<VtxType>::iterator it=coarsetPartition.begin(); \
+    //     it!=coarsetPartition.end();\
+    //     ++it)
+    // {
+    //     std::cout << (*it) << " ";
     // }
-    kl_bisection(coarsetCG, coarsetPartition, 0, 1);
+    // std::cout << std::endl;
 
 
     return SUCCESS_INIT_PARTITION;
