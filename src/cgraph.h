@@ -47,8 +47,9 @@ class CGraph
         std::vector<VtxType> adj(VtxType s);
         std::vector<WgtType> adj_wgts(VtxType s);
         VtxType get_edge_id(VtxType vtx, VtxType corrVtx);
-        int get_num_vtxs();
+        int     get_num_vtxs();
         WgtType get_pwgt(VtxType a, VtxType b);
+        void    get_prev_node(VtxType& mNode, VtxType& pu, VtxType& pv);
         bool is_edge(VtxType a, VtxType b);
         void print_graph();
 };

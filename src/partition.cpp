@@ -536,34 +536,102 @@ int partitioning_phase(CGraph::CGraph& coarsetCG, \
         {
             
             kl_bisection(coarsetCG, coarsetPartition, p, ++next_part_idx);
-            std::cout << "work on partition " << p << " to " << next_part_idx << std::endl;
-            std::cout << "current coarset partition" << std::endl;
-            for (std::vector<VtxType>::iterator it=coarsetPartition.begin(); \
-                it!=coarsetPartition.end();\
-                ++it)
-            {
-                std::cout << (*it) << " ";
-            }
-            std::cout << std::endl;
 
         }
 
     }
-    // kl_bisection(coarsetCG, coarsetPartition, 0, 1);
-    // std::cout << "current coarset partition" << std::endl;
-    // for (std::vector<VtxType>::iterator it=coarsetPartition.begin(); \
-    //     it!=coarsetPartition.end();\
-    //     ++it)
-    // {
-    //     std::cout << (*it) << " ";
-    // }
-    // std::cout << std::endl;
+
+    std::cout << "current coarset partition" << std::endl;
+    for (std::vector<VtxType>::iterator it=coarsetPartition.begin(); \
+        it!=coarsetPartition.end();\
+        ++it)
+    {
+        std::cout << (*it) << " ";
+    }
+    std::cout << std::endl;
 
 
     return SUCCESS_INIT_PARTITION;
 
 }
 
+
+/******************************************************************************
+ *                           Uncoarsening Phase                               *
+ ******************************************************************************/
+void project_partition(CGraph::CGraph& prevCG, \
+                    CGraph::CGraph& currCG, \
+                    std::vector<int>& prev_partition, \
+                    std::vector<int>& curr_partition)
+{
+    std::cout << "current coarset graph # vtx =" << currCG.get_num_vtxs() << std::endl;
+    std::cout << "previous coarset graph # vtx =" << prevCG.get_num_vtxs() << std::endl;
+    std::cout << "current graph" << std::endl;
+    currCG.print_graph();
+    // initialize current partition
+    prev_partition.resize(prevCG.get_num_vtxs());
+    std::fill(prev_partition.begin(), prev_partition.end(), 0);
+
+    // run through current partition and current coarse graph
+    // to project corresponding multinode
+    VtxType pu = -1;
+    VtxType pv = -1;
+    for (VtxType i=0; i<curr_partition.size(); ++i)
+    {
+        currCG.get_prev_node(i, pu, pv);
+        std::cout << "mnode = " << i << "; pu = " << pu << "; pv = " << pv << std::endl;
+        // two case
+        // 1) really multinode: pu, pv are previous id
+        if ( pv != -1 )
+        {
+            prev_partition.at(pu) = curr_partition.at(i);
+            prev_partition.at(pv) = curr_partition.at(i);
+        }
+        // 2) simplenode: pv = -1
+        else
+        {
+            prev_partition.at(pu) = curr_partition.at(i);
+        }
+
+    }
+
+}
+
+
+int uncoarsening_phase(std::vector<CGraph::CGraph>& cgs, \
+    std::vector<int>& coarset_partition)
+{
+    std::vector<int> prev_partition;
+    std::vector<int> curr_partition;
+    int prev_cg_idx;
+    int curr_cg_idx;
+    // 1) project current partition to previous coarse graph partition
+    curr_partition = coarset_partition;
+    for (int cgi=cgs.size()-1; cgi>0; --cgi)
+    {
+
+        curr_cg_idx = cgi;
+        prev_cg_idx = cgi-1;
+
+        // projecting step
+        std::cout << "project cg " << curr_cg_idx << " to cg " << prev_cg_idx << std::endl;
+        project_partition(cgs.at(prev_cg_idx), cgs.at(curr_cg_idx), \
+            prev_partition, curr_partition);
+
+        // refine_partition(curr_partition);
+
+        // after previous steps, assign current partition to previous partition
+        // for next round usage
+        curr_partition = prev_partition;
+    }
+
+    return SUCCESS_UNCOARSENING;
+    
+}
+
+/******************************************************************************
+ *                      Overall Partitioning Process                          *
+ ******************************************************************************/
 
 
 int partition_graph (Graph::Graph& g, std::vector<int>& partition, int partNum)
@@ -574,7 +642,7 @@ int partition_graph (Graph::Graph& g, std::vector<int>& partition, int partNum)
 
     std::vector<int> coarset_partition;
     partitioning_phase(cgs.at(cgs.size()-1), coarset_partition, partNum);
-    // uncoarsening_phase();
+    uncoarsening_phase(cgs, coarset_partition);
 
     return SUCCESS_PARTITION;
 }

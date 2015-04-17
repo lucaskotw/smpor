@@ -21,6 +21,7 @@ extern "C" {
 #define SUCCESS_COARSENING     0
 #define SUCCESS_INIT_PARTITION 0
 #define SUCCESS_PARTITION      0
+#define SUCCESS_UNCOARSENING   0
 #define FAIL_PARTITION        -1
 
 
@@ -78,6 +79,18 @@ void kl_bisection(CGraph::CGraph& coarsetCG, \
 int partitioning_phase(CGraph::CGraph& coarsetCG, \
     std::vector<int>& coarsetPartition, \
     int partNum);
+
+
+/**********************
+ * Uncoarsening Phase *
+ **********************/
+void project_partition(CGraph::CGraph& prevCG, \
+                       CGraph::CGraph& currCG, \
+                       std::vector<int>& prev_partition, \
+                       std::vector<int>& curr_partition);
+int uncoarsening_phase(std::vector<CGraph::CGraph>& cgs, \
+    std::vector<int>& coarset_partition);
+
 
 /********************************
  * Overall Partitioning Process *

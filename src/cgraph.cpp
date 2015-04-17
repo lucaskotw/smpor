@@ -130,6 +130,16 @@ WgtType CGraph::get_pwgt(VtxType a, VtxType b)
 }
 
 
+/****************************************************
+ * assign passing in pu and pv of current multinode *
+ ****************************************************/
+void CGraph::get_prev_node(VtxType& mNode, VtxType& pu, VtxType& pv)
+{
+    pu = vtxs.at(mNode).pu;
+    pv = vtxs.at(mNode).pv;
+}
+
+
 /******************
  * show the graph *
  ******************/
