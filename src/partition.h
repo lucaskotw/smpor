@@ -11,14 +11,17 @@ extern "C" {
 #include "cgraph.h"
 
 
-#define THRESHOLD_VTX    15
-#define THRESHOLD_RATIO  0.8
-#define MAX_WGT_INIT_VAL -1
+#define THRESHOLD_VTX     15
+#define THRESHOLD_RATIO   0.8
+#define MAX_WGT_INIT_VAL  -10000000
+#define MAX_GAIN_INIT_VAL -10000000
 
 
-#define SUCCESS_MATCHING   0
-#define SUCCESS_COARSENING 0
-#define SUCCESS_PARTITION  0
+#define SUCCESS_MATCHING       0
+#define SUCCESS_COARSENING     0
+#define SUCCESS_INIT_PARTITION 0
+#define SUCCESS_PARTITION      0
+#define FAIL_PARTITION        -1
 
 
 inline void select_vertex_with_heaviest_edge(std::vector<VtxType>& adj,\
@@ -38,9 +41,47 @@ inline void select_vertex_with_heaviest_edge(std::vector<VtxType>& adj,\
 
 }
 
+
+/********************
+ * Coarsening Phase *
+ ********************/
 int heavy_edge_matching(CGraph& pcg, CGraph& cg);
 bool is_coarsening_terminate(CGraph::CGraph& pcg, CGraph::CGraph& cg, int partNum);
 int coarsening_phase (Graph::Graph& g, std::vector<CGraph::CGraph>& cgs, int partNum);
+
+/******************************
+ * Initial Partitioning Phase *
+ ******************************/
+bool is_partition_num_exceed(std::vector<int>& partition, int partID, int partNum);
+bool is_adj_lock(std::vector<VtxType>& part_order, \
+                std::vector<bool>& lock, \
+                VtxType adjVtx);
+void compute_gain(CGraph::CGraph& coarsetCG, \
+    std::vector<VtxType>& part_order, \
+    std::vector<WgtType>& gain, \
+    std::vector<bool>& lock);
+void find_max_gain(CGraph::CGraph& coarsetCG, \
+                    std::vector<WgtType>& gain, \
+                    std::vector<bool>& lock, \
+                    WgtType& d, \
+                    VtxType& a, \
+                    VtxType& b);
+void find_k_max_diff(std::vector<WgtType>& diff, \
+                    WgtType& diff_max, \
+                    int& k);
+void exchange_av_with_bv(std::vector<VtxType>& partOrder, \
+                        std::vector<VtxType>& av, \
+                        std::vector<VtxType>& bv);
+void kl_bisection(CGraph::CGraph& coarsetCG, \
+    std::vector<int>& coarsetPartition, \
+    int partID, int nextPartID);
+int partitioning_phase(CGraph::CGraph& coarsetCG, \
+    std::vector<int>& coarsetPartition, \
+    int partNum);
+
+/********************************
+ * Overall Partitioning Process *
+ ********************************/
 int partition_graph (Graph::Graph& g, std::vector<int>& partition, int partNum);
 
 

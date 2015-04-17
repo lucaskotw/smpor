@@ -10,7 +10,9 @@
 #include "partition.h"
 
 
-
+/******************************************************************************
+ *                           Coarsening Phase                                 *
+ ******************************************************************************/
 int heavy_edge_matching(CGraph& pcg, CGraph& cg)
 {
     // 1. given random order to traverse pcg
@@ -192,8 +194,8 @@ int coarsening_phase (Graph::Graph& g, std::vector<CGraph::CGraph>& cgs, int par
     cg.print_graph();
     cgs.push_back(cg);
 
-std::cout << "cg num = " << cg.get_num_vtxs() << std::endl;
-        std::cout << "ratio = " << ((double)(pcg.get_num_vtxs() - cg.get_num_vtxs()))/pcg.get_num_vtxs() << std::endl;
+    std::cout << "cg num = " << cg.get_num_vtxs() << std::endl;
+    std::cout << "ratio = " << ((double)(pcg.get_num_vtxs() - cg.get_num_vtxs()))/pcg.get_num_vtxs() << std::endl;
     while( !is_coarsening_terminate(pcg, cg, partNum) )
     {
         std::cout << "cg num = " << cg.get_num_vtxs() << std::endl;
@@ -213,12 +215,335 @@ std::cout << "cg num = " << cg.get_num_vtxs() << std::endl;
 }
 
 
+/******************************************************************************
+ *                           Partitioning Phase                               *
+ ******************************************************************************/
+
+bool is_partition_num_exceed(std::vector<int>& partition, int partID, int partNum)
+{
+    int part_id_num = 0;
+    for (std::vector<int>::iterator it=partition.begin(); it!=partition.end(); ++it)
+    {
+        if ( (*it) == partID) ++part_id_num;
+    }
+    if (part_id_num > partition.size()/partNum+1)
+    {
+        std::cout << "partition threshold = " << partition.size()/partNum+1 << std::endl;
+        std::cout << "partition id number = " << part_id_num << std::endl;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool in_partition(VtxType vtx, std::vector<VtxType>& partSet)
+{
+    for (std::vector<VtxType>::iterator it=partSet.begin();\
+        it!=partSet.end();\
+        ++it)
+    {
+        if ( vtx == (*it) ) return true;
+    }
+    return false;
+}
+
+
+bool is_adj_lock(std::vector<VtxType>& part_order, \
+                std::vector<bool>& lock, \
+                VtxType adjVtx)
+{
+    int lock_id = 0;
+    for (int i=0; i<part_order.size(); ++i)
+    {
+        if (adjVtx == part_order.at(i))
+        {
+            lock_id = i;
+            break;
+        }
+    }
+    if (lock.at(lock_id)) return true;
+    else return false;
+}
+
+
+void compute_gain(CGraph::CGraph& coarsetCG, \
+    std::vector<VtxType>& part_order, \
+    std::vector<WgtType>& gain, \
+    std::vector<bool>& lock)
+{
+    // reset gain with lock is false
+    for (int i=0; i<gain.size(); ++i)
+    {
+        if (!lock.at(i)) gain.at(i) = 0;
+    }
+
+
+    // record the partition vertices
+    std::vector<VtxType> part_a;
+    for (int a=0; a<part_order.size()/2; ++a) part_a.push_back(part_order.at(a));
+    std::vector<VtxType> part_b;
+    for (int b=part_order.size()/2; b<part_order.size(); ++b)
+        part_b.push_back(part_order.at(b));
+
+    // Compute the gain
+    std::vector<VtxType> adj;
+    std::vector<WgtType> adj_wgts;
+    int                  adj_idx;
+
+    // 1) Partition A gain
+    for (int a=0; a<part_a.size(); ++a)
+    {
+        if (!lock.at(a))
+        {
+            adj = coarsetCG.adj(part_a.at(a));
+            adj_wgts = coarsetCG.adj_wgts(part_a.at(a));
+            adj_idx = 0;
+            for (std::vector<VtxType>::iterator it=adj.begin(); it!=adj.end(); ++it)
+            {
+                if ( !is_adj_lock(part_order, lock, (*it)) )
+                {
+                    if ( in_partition((*it), part_b) )
+                    {
+                        gain.at(a) += adj_wgts.at(adj_idx);
+                    }
+                    if ( in_partition((*it), part_a) )
+                    {
+                        gain.at(a) -= adj_wgts.at(adj_idx);
+                    }
+                }
+                ++adj_idx;
+            }
+        }
+    }
+    // 2) Partition B gain
+    for (int b=0; b<part_b.size(); ++b)
+    {
+        if (!lock.at(b+gain.size()/2))
+        {
+            adj = coarsetCG.adj(part_b.at(b));
+            adj_wgts = coarsetCG.adj_wgts(part_b.at(b));
+            adj_idx = 0;
+            for (std::vector<VtxType>::iterator it=adj.begin(); it!=adj.end(); ++it)
+            {
+                if ( !is_adj_lock(part_order, lock, (*it)) )
+                {
+                    if ( in_partition((*it), part_a) )
+                    {
+                        gain.at(b+part_a.size()) += adj_wgts.at(adj_idx);
+                    }
+                    if ( in_partition((*it), part_b) )
+                    {
+                        gain.at(b+part_a.size()) -= adj_wgts.at(adj_idx);
+                    }
+                }
+                ++adj_idx;
+            }
+        }
+    }
+}
+
+
+
+void find_max_gain(CGraph::CGraph& coarsetCG, \
+                    std::vector<VtxType>& partOrder, \
+                    std::vector<WgtType>& gain, \
+                    std::vector<bool>& lock, \
+                    WgtType& d, \
+                    VtxType& a, \
+                    VtxType& b)
+{
+    // Select the gain that is maximum in first half in gain
+    // and second half in gain
+    // 1) part A
+    int max_a_gain = MAX_GAIN_INIT_VAL;
+    int max_a_idx = 0;
+    for (int i=0; i<gain.size()/2; ++i)
+    {
+        if ((gain.at(i) > max_a_gain) && (!lock.at(i))) // if not lock, then select
+        {
+            max_a_gain = gain.at(i);
+            max_a_idx = i;
+        }
+    }
+
+    // 2) part B
+    int max_b_gain = MAX_GAIN_INIT_VAL;
+    int max_b_idx = 0;
+    for (int i=gain.size()/2; i<gain.size(); ++i)
+    {
+        if ((gain.at(i) > max_b_gain) && (!lock.at(i)))
+        {
+            max_b_gain = gain.at(i);
+            max_b_idx = i;
+        }
+    }
+
+    // assign a, b to corresponding vertex id in cg
+    a = partOrder.at(max_a_idx);
+    b = partOrder.at(max_b_idx);
+    // calculate difference and assign to d
+    if (coarsetCG.is_edge(a, b)){
+        d = max_a_gain + max_b_gain - 2*coarsetCG.get_pwgt(a, b);
+    }
+    else
+    {
+        d = max_a_gain + max_b_gain;
+    }
+    
+    // set both vertices idx in lock true
+    lock.at(max_a_idx) = true;
+    lock.at(max_b_idx) = true;
+}
+
+
+void find_k_max_diff(std::vector<WgtType>& diff, \
+                    WgtType& diff_max, \
+                    int& k)
+{
+    WgtType diff_curr_sum = 0;
+    diff_max = 0;
+    int i = 0;
+    for (std::vector<WgtType>::iterator it=diff.begin(); it!=diff.end(); ++it)
+    {
+        diff_curr_sum += (*it);
+        if (diff_curr_sum > diff_max)
+        {
+            diff_max = diff_curr_sum;
+            k = i;
+        }
+        ++i;
+    }
+
+}
+
+
+void exchange_av_with_bv(std::vector<VtxType>& partOrder, \
+                        std::vector<VtxType>& av, \
+                        std::vector<VtxType>& bv, \
+                        int k)
+{
+    int a_idx;
+    int b_idx;
+    int tmp_vtx;
+
+    for (int i=0; i<k+1; ++i) // because k is a index, starting from 0
+    {
+        // get a, b index in partOrder
+        for (int pi=0; pi<partOrder.size(); ++pi)
+        {
+            if (av.at(i) == partOrder.at(pi)) a_idx = pi;
+            if (bv.at(i) == partOrder.at(pi)) b_idx = pi;
+        }
+
+        // swap order
+        tmp_vtx = partOrder.at(a_idx);
+        partOrder.at(a_idx) = partOrder.at(b_idx);
+        partOrder.at(b_idx) = tmp_vtx;
+    }
+}
+
+/*
+ * The variables naming are based on KK99
+ */
+void kl_bisection(CGraph::CGraph& coarsetCG, \
+    std::vector<int>& coarsetPartition, \
+    int partID, int nextPartID)
+{
+    // [Initial step] randomly giving the partition id
+    // vertices id in part_order <= |part_order|/2 -> first partition
+    // else -> second parition
+    std::vector<VtxType> part_order;
+    for (int i=0; i<coarsetCG.get_num_vtxs(); ++i)
+    {
+        // put the vertex inside the order if it's in the expected partition id
+        if (coarsetPartition.at(i) == partID) part_order.push_back(i);
+    }
+    srand(1);
+    std::random_shuffle(part_order.begin(), part_order.end());
+
+    // [Iteration step] kl iteration
+    std::vector<WgtType> gain(part_order.size());
+    std::vector<bool>    lock(part_order.size());
+    std::vector<VtxType> av;
+    std::vector<VtxType> bv;
+    std::vector<WgtType> diff; // term to decide diff is clean or not
+    WgtType diff_max = 0;
+    int            k = 0;
+    WgtType        d;
+    VtxType        a;
+    VtxType        b;
+
+    do
+    {
+        std::fill(lock.begin(), lock.end(), false);
+        compute_gain(coarsetCG, part_order, gain, lock);
+        av.resize(0);
+        bv.resize(0);
+        diff.resize(0);
+
+        for (int i=0; i<part_order.size()/2; ++i)
+        {
+
+            find_max_gain(coarsetCG, part_order, gain, lock, d, a, b);
+
+            diff.push_back(d);
+            av.push_back(a);
+            bv.push_back(b);
+
+            compute_gain(coarsetCG, part_order, gain, lock);
+            
+
+        }
+
+        find_k_max_diff(diff, diff_max, k);
+
+        if (diff_max > 0)
+        {
+            exchange_av_with_bv(part_order, av, bv, k);
+        }
+    } while (diff_max > 0);
+
+}
+
+
+int partitioning_phase(CGraph::CGraph& coarsetCG, \
+    std::vector<int>& coarsetPartition, \
+    int partNum)
+{
+    coarsetPartition.resize(coarsetCG.get_num_vtxs());
+    std::fill(coarsetPartition.begin(), coarsetPartition.end(), 0);
+    int next_part_idx = 0;
+
+    // // examine whether the number of vertices in current partition exceeding the
+    // // expected number (= n/k, where k is partition number)
+    // for (int p=0; p<partNum; ++p)
+    // {
+    //     while (is_partition_num_exceed(coarset_partition, p, partNum))
+    //     {
+    //         std::cout << "now work on partition " << p << " to " << p+1 << std::endl;
+    //         kl_bisection(coarestCG, coarset_partition, p, ++next_part_idx);
+
+    //     }
+    // }
+    kl_bisection(coarsetCG, coarsetPartition, 0, 1);
+
+
+    return SUCCESS_INIT_PARTITION;
+
+}
+
+
 
 int partition_graph (Graph::Graph& g, std::vector<int>& partition, int partNum)
 {
+
     std::vector<CGraph::CGraph> cgs;
     coarsening_phase(g, cgs, partNum);
-    // partitioning_phase();
+
+    std::vector<int> coarset_partition;
+    partitioning_phase(cgs.at(cgs.size()-1), coarset_partition, partNum);
     // uncoarsening_phase();
 
     return SUCCESS_PARTITION;

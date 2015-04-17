@@ -48,6 +48,8 @@ class CGraph
         std::vector<WgtType> adj_wgts(VtxType s);
         VtxType get_edge_id(VtxType vtx, VtxType corrVtx);
         int get_num_vtxs();
+        WgtType get_pwgt(VtxType a, VtxType b);
+        bool is_edge(VtxType a, VtxType b);
         void print_graph();
 };
 

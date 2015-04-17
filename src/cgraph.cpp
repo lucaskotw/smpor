@@ -101,6 +101,35 @@ int CGraph::get_num_vtxs()
 }
 
 
+/**********************************************************
+ * check whether the given vertices pair is an edge in CG *
+ **********************************************************/
+bool CGraph::is_edge(VtxType a, VtxType b)
+{
+    for (int i=0; i<vtxs.at(a).edges.size(); ++i)
+    {
+        if (vtxs.at(a).edges.at(i) == b) return true;
+    }
+
+    return false;
+}
+
+/**********************************************************
+ * check whether the given vertices pair is an edge in CG *
+ **********************************************************/
+WgtType CGraph::get_pwgt(VtxType a, VtxType b)
+{
+    if (is_edge(a, b))
+    {
+        for (int i=0; i<vtxs.at(a).edges.size(); ++i)
+        {
+            if (vtxs.at(a).edges.at(i) == b) return vtxs.at(a).pWgts.at(i);
+        }
+    }
+    return -1;
+}
+
+
 /******************
  * show the graph *
  ******************/
