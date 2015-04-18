@@ -77,10 +77,6 @@ int load_graph_from_mm(char* filePath, Graph::Graph& g)
     while (fin.getline(buff, FILE_BUFFER_SIZE))
     {
         read_edge_from_input(buff, FILE_BUFFER_SIZE, u, v, pWgt);
-        std::cout << buff << std::endl;
-        std::cout << u << std::endl;
-        std::cout << v << std::endl;
-        std::cout << pWgt << std::endl;
         if (pWgt == 0) {
             pWgt = 1;
             g.add_edge(u-1, v-1, pWgt);

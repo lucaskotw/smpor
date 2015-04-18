@@ -183,7 +183,6 @@ int coarsening_phase (Graph::Graph& g, std::vector<CGraph::CGraph>& cgs, int par
             cg.add_edge_weight(i, edge_id, adj_wgts.at(j) );
         }
     }
-    cg.print_graph();
     cgs.push_back(cg);
 
     // start the coarsening process
@@ -191,15 +190,14 @@ int coarsening_phase (Graph::Graph& g, std::vector<CGraph::CGraph>& cgs, int par
     CGraph pcg = cg;
     cg = CGraph();
     heavy_edge_matching(pcg, cg);
-    cg.print_graph();
     cgs.push_back(cg);
+    // print out first coarsening process
+    std::cout << "coarse original graph to cg0" << std::endl;
 
-    std::cout << "cg num = " << cg.get_num_vtxs() << std::endl;
-    std::cout << "ratio = " << ((double)(pcg.get_num_vtxs() - cg.get_num_vtxs()))/pcg.get_num_vtxs() << std::endl;
+    int c_idx = 0;
     while( !is_coarsening_terminate(pcg, cg, partNum) )
     {
-        std::cout << "cg num = " << cg.get_num_vtxs() << std::endl;
-        std::cout << "ratio = " << ((double)(pcg.get_num_vtxs() - cg.get_num_vtxs()))/(double)pcg.get_num_vtxs() << std::endl;
+        
         // clear cg and record pcg for this round
         pcg = cg;
         cg = CGraph();
@@ -207,6 +205,9 @@ int coarsening_phase (Graph::Graph& g, std::vector<CGraph::CGraph>& cgs, int par
         // matching process
         heavy_edge_matching(pcg, cg);
         cgs.push_back(cg);
+        // print out coarsen status after finishing the process
+        ++c_idx;
+        std::cout << "coarse graph from cg" << c_idx-1 << " to cg" << c_idx << std::endl;
 
     }
 
@@ -228,8 +229,6 @@ bool is_partition_num_exceed(std::vector<int>& partition, int partID, int partNu
     }
     if (part_id_num > partition.size()/partNum+1)
     {
-        std::cout << "partition threshold = " << partition.size()/partNum+1 << std::endl;
-        std::cout << "partition id number = " << part_id_num << std::endl;
         return true;
     }
     else
@@ -541,15 +540,6 @@ int partitioning_phase(CGraph::CGraph& coarsetCG, \
 
     }
 
-    std::cout << "current coarset partition" << std::endl;
-    for (std::vector<VtxType>::iterator it=coarsetPartition.begin(); \
-        it!=coarsetPartition.end();\
-        ++it)
-    {
-        std::cout << (*it) << " ";
-    }
-    std::cout << std::endl;
-
 
     return SUCCESS_INIT_PARTITION;
 
@@ -564,10 +554,6 @@ void project_partition(CGraph::CGraph& prevCG, \
                     std::vector<int>& prev_partition, \
                     std::vector<int>& curr_partition)
 {
-    std::cout << "current coarset graph # vtx =" << currCG.get_num_vtxs() << std::endl;
-    std::cout << "previous coarset graph # vtx =" << prevCG.get_num_vtxs() << std::endl;
-    std::cout << "current graph" << std::endl;
-    currCG.print_graph();
     // initialize current partition
     prev_partition.resize(prevCG.get_num_vtxs());
     std::fill(prev_partition.begin(), prev_partition.end(), 0);
@@ -646,6 +632,8 @@ int partition_graph (Graph::Graph& g, std::vector<int>& partition, int partNum)
     std::vector<int> coarset_partition;
     partitioning_phase(cgs.at(cgs.size()-1), coarset_partition, partNum);
     uncoarsening_phase(cgs, partition, coarset_partition);
+
+    // print out the partition result
     std::cout << "finest partition" << std::endl;
     for (std::vector<int>::iterator it=partition.begin(); \
         it!=partition.end(); \
