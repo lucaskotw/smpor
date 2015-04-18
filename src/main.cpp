@@ -7,6 +7,7 @@
 
 #include "load_graph.h"
 #include "partition.h"
+#include "draw_layout.h"
 
 int main(int argc, char** argv)
 {
@@ -33,6 +34,11 @@ int main(int argc, char** argv)
 
     /* Ended of the elapsed time measure */
     clock_t end = clock();
+
+
+    /* Draw the Layout*/
+    
+    draw_layout(edges, coord, partition);
 
     /* Show the elapsed time */    
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;

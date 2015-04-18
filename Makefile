@@ -5,7 +5,9 @@ CXX = g++
 LINKER = g++ -o
 DEBUG = -g
 CFLAGS = -Wall -c $(DEBUG)
-LFLAGS = -Wall $(DEBUG)
+LFLAGS = -Wall -framework OpenGL -lglfw3 $(DEBUG)
+IPATHS = -I/usr/local/Cellar/eigen/3.2.4/include/eigen3/ -I/usr/local/include -I/opt/X11/include
+LPATHS = -L/usr/local/lib -L/opt/X11/lib
 
 # Modifed Makefile after understanding needed makefile knowledge
 SRCDIR = src
