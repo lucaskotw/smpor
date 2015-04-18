@@ -579,7 +579,6 @@ void project_partition(CGraph::CGraph& prevCG, \
     for (VtxType i=0; i<curr_partition.size(); ++i)
     {
         currCG.get_prev_node(i, pu, pv);
-        std::cout << "mnode = " << i << "; pu = " << pu << "; pv = " << pv << std::endl;
         // two case
         // 1) really multinode: pu, pv are previous id
         if ( pv != -1 )
@@ -599,6 +598,7 @@ void project_partition(CGraph::CGraph& prevCG, \
 
 
 int uncoarsening_phase(std::vector<CGraph::CGraph>& cgs, \
+    std::vector<int>& partition, \
     std::vector<int>& coarset_partition)
 {
     std::vector<int> prev_partition;
@@ -625,6 +625,9 @@ int uncoarsening_phase(std::vector<CGraph::CGraph>& cgs, \
         curr_partition = prev_partition;
     }
 
+    // after processing the finest partition, assigne to partition argument
+    partition = curr_partition;
+
     return SUCCESS_UNCOARSENING;
     
 }
@@ -642,7 +645,15 @@ int partition_graph (Graph::Graph& g, std::vector<int>& partition, int partNum)
 
     std::vector<int> coarset_partition;
     partitioning_phase(cgs.at(cgs.size()-1), coarset_partition, partNum);
-    uncoarsening_phase(cgs, coarset_partition);
+    uncoarsening_phase(cgs, partition, coarset_partition);
+    std::cout << "finest partition" << std::endl;
+    for (std::vector<int>::iterator it=partition.begin(); \
+        it!=partition.end(); \
+        ++it)
+    {
+        std::cout << (*it) << " ";
+    }
+    std::cout << std::endl;
 
     return SUCCESS_PARTITION;
 }

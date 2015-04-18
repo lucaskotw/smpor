@@ -89,6 +89,7 @@ void project_partition(CGraph::CGraph& prevCG, \
                        std::vector<int>& prev_partition, \
                        std::vector<int>& curr_partition);
 int uncoarsening_phase(std::vector<CGraph::CGraph>& cgs, \
+    std::vector<int>& partition, \
     std::vector<int>& coarset_partition);
 
 
