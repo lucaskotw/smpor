@@ -17,12 +17,7 @@ extern "C" {
 #define MAX_GAIN_INIT_VAL -10000000
 
 
-#define SUCCESS_MATCHING       0
-#define SUCCESS_COARSENING     0
-#define SUCCESS_INIT_PARTITION 0
-#define SUCCESS_PARTITION      0
-#define SUCCESS_UNCOARSENING   0
-#define FAIL_PARTITION        -1
+
 
 
 inline void select_vertex_with_heaviest_edge(std::vector<VtxType>& adj,\
