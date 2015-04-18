@@ -6,8 +6,7 @@
 #include <iostream>
 
 
-#define VtxType  int     // type of vertex id
-#define WgtType  double  // type of edge weight value
+#include "config.h"
 
 #define NullVtx  -1
 
