@@ -12,6 +12,7 @@
 
 #include "load_graph.h"
 #include "partition.h"
+#include "smpor.h"
 #include "draw_layout.h"
 
 int main(int argc, char** argv)
@@ -38,7 +39,7 @@ int main(int argc, char** argv)
     /* Stress Majorization */
     std::vector< std::vector<CoordType> > coord;
 
-    // smpor(g, coord, partition, PARTITION_NUM);
+    smpor(g, coord, partition, PARTITION_NUM);
 
 
     /* Ended of the elapsed time measure */
