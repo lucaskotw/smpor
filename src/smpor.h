@@ -24,11 +24,19 @@
 /******************
  * Create P-Graph *
  ******************/
-void find_p_center_radius(Graph::Graph& g, std::vector<int>& partition,\
-                   int partID, VtxType& pCenter, WgtType& pRadius);
+void find_p_center_radius(Graph::Graph& g, std::vector<Graph>& sg_vec,\
+                          std::vector<int>& partition,\
+                          int partID, VtxType& pCenter, WgtType& pRadius);
 void add_p_graph_edges(PGraph::PGraph& pg, Graph::Graph& g);
-int create_pgraph(PGraph::PGraph& pg, Graph::Graph& g,\
-    std::vector<int>& partition, int partNum);
+int create_pgraph(PGraph::PGraph& pg, std::vector<Graph>& sg_vec,\
+    Graph::Graph& g, std::vector<int>& partition, int partNum);
+
+void match_partition_coord(std::vector<int>& partition_vtxs,\
+    std::vector< std::vector<CoordType> >& partition_coords,\
+    std::vector< std::vector<CoordType> >& pg_coord,\
+    std::vector< std::vector<CoordType> >& coord,\
+    int partID,\
+    int pCenter);
 
 /****************
  * Main Process *

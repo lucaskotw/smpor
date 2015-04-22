@@ -37,9 +37,27 @@ int main(int argc, char** argv)
 
 
     /* Stress Majorization */
-    std::vector< std::vector<CoordType> > coord;
-
+    std::vector< std::vector<CoordType> > coord(g.get_num_vtxs(),\
+                                                std::vector<CoordType>(2));
     smpor(g, coord, partition, PARTITION_NUM);
+
+    /* port and boundary assignment - create edges */
+    std::vector< std::vector<VtxType> > edges;
+    std::vector<VtxType> adj;
+    std::vector<VtxType> pair(2);
+    for (int vtx=0; vtx<g.get_num_vtxs(); ++vtx)
+    {
+        adj = g.adj(vtx);
+        for (int nb=0; nb<adj.size(); ++nb)
+        {
+            if (vtx<adj.at(nb))
+            {
+                pair.at(0) = vtx;
+                pair.at(1) = adj.at(nb);
+                edges.push_back(pair);
+            }
+        }
+    }
 
 
     /* Ended of the elapsed time measure */
@@ -48,7 +66,7 @@ int main(int argc, char** argv)
 
     /* Draw the Layout*/
 
-    // draw_layout(edges, coord, partition);
+    draw_layout(edges, coord, partition);
 
     /* Show the elapsed time */    
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;

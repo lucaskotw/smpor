@@ -12,6 +12,11 @@
 
 
 double stress(DenseMat & distMat, std::vector< std::vector<CoordType> >& coord);
+int stress_majorization(Graph::Graph & g,\
+                        DenseMat& distMat,\
+                        DenseMat& wLap,\
+                        std::vector< std::vector<CoordType> >& coord,
+                        int pCenter);
 int stress_majorization_with_pg(PGraph::PGraph & pg,\
                                 DenseMat& distMat,\
                                 DenseMat& wLap,\

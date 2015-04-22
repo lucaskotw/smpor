@@ -9,8 +9,11 @@
 
 
 double inv_norm(DenseMat& coord, int iR, int jR);
-void iter_lap_with_vertex_radius(PGraph::PGraph& pg, DenseMat& dist,\
+void w_lap_normal(Graph::Graph& g, DenseMat& dist, DenseMat& lap);
+void iter_lap_normal(Graph::Graph& g, DenseMat& dist,\
         DenseMat& lap, DenseMat& coord);
 void w_lap_with_vertex_radius(PGraph::PGraph& pg, DenseMat& dist, DenseMat& lap);
+void iter_lap_with_vertex_radius(PGraph::PGraph& pg, DenseMat& dist,\
+        DenseMat& lap, DenseMat& coord);
 
 #endif
