@@ -25,8 +25,10 @@
 #define FAIL_PARTITION        -1
 
 /* smpor stage */
-#define SUCCESS_CREATE_PGRAPH  0
-#define SUCCESS_BFS            0
-#define SUCCESS_SMPOR          0
+#define SUCCESS_CREATE_PGRAPH       0
+#define SUCCESS_BFS                 0
+#define SUCCESS_PARTITION_PLACEMENT 0
+#define SUCCESS_SM_PG               0
+#define SUCCESS_SMPOR               0
 
 #endif

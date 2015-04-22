@@ -4,6 +4,7 @@
 
 #include "config.h"
 #include "graph.h"
+#include "pgraph.h"
 #include <vector>
 #include <queue>
 
@@ -13,6 +14,7 @@
 
 
 int bfs(Graph::Graph& g, int gSize, VtxType s, std::vector<WgtType>& dist);
+int bfs_pg(PGraph::PGraph& pg, int pgSize, VtxType s, std::vector<WgtType>& dist);
 
 
 #endif

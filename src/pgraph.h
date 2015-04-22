@@ -32,6 +32,9 @@ class PGraph
         void add_node(VtxType pCenter, WgtType pRadius);
         void add_edge(VtxType u, VtxType v, WgtType pWgt);
         VtxType get_center_id(VtxType pID);
+        WgtType get_radius(VtxType pID);
+        std::vector<VtxType> adj(VtxType s);
+        std::vector<WgtType> adj_wgts(VtxType s);
         int get_num_vtxs();
         void print_graph();
 };

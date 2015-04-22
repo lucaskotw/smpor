@@ -75,8 +75,6 @@ void add_p_graph_edges(PGraph::PGraph& pg, Graph::Graph& g)
     for (VtxType p_v=0; p_v<pg.get_num_vtxs(); ++p_v)
     {
         bfs(g, orig_g_size, pg.get_center_id(p_v), dist);
-        // print out dist val
-        std::cout << "bfs dist from source = " << p_v << std::endl;
         for (std::vector<WgtType>::iterator it=dist.begin(); it!=dist.end(); ++it)
         {
             std::cout << *it << " ";
@@ -105,8 +103,6 @@ int create_pgraph(PGraph::PGraph& pg, Graph::Graph& g,\
     for (int p=0; p<partNum; ++p)
     {
         find_p_center_radius(g, partition, p, p_center, p_radius);
-        std::cout << "partition #" << p << "'s center = " << p_center << std::endl;
-        std::cout << "partition #" << p << "'s radius = " << p_radius << std::endl;
         pg.add_node(p_center, p_radius);
     }
 
@@ -120,6 +116,87 @@ int create_pgraph(PGraph::PGraph& pg, Graph::Graph& g,\
 
 
 /******************************************************************************
+ *                       Stress Majorization                                  *
+ *                    with node overlap removal                               *
+ ******************************************************************************/
+void distance_matrix_with_modifed_radius(PGraph::PGraph& pg, DenseMat& distMat)
+{
+    
+    int pg_size = pg.get_num_vtxs();
+    std::vector<WgtType> dist(pg_size);
+
+    for (int v=0; v<pg_size; ++v)
+    {
+        bfs_pg(pg, pg_size, v, dist);
+        for (int n_v=0; n_v<pg_size; ++n_v)
+        {
+            if (v != n_v)
+            {
+                if ( (pg.get_radius(v)+pg.get_radius(n_v)) > dist.at(n_v) )
+                    dist.at(n_v) = pg.get_radius(v)+pg.get_radius(n_v);
+            }
+
+        }
+        distMat.row(v) = MapVec(&dist[0], dist.size());
+    }
+
+
+}
+
+
+
+int stress_majorization_with_node_overlap_removal(PGraph::PGraph& pg,\
+    std::vector< std::vector<CoordType> >& pg_coord)
+{
+    DenseMat dist_mat(pg.get_num_vtxs(), pg.get_num_vtxs());
+    DenseMat w_lap(pg.get_num_vtxs(), pg.get_num_vtxs());
+
+    distance_matrix_with_modifed_radius(pg, dist_mat);
+    std::cout << dist_mat << std::endl;
+    w_lap_with_vertex_radius(pg, dist_mat, w_lap); // put to lap.h
+    std::cout << w_lap << std::endl;
+
+    // randomly start coordinates assignment
+    srand(1); // set seed to 1
+    for (int i=0; i<pg.get_num_vtxs(); ++i) {
+        pg_coord.at(i).at(0) = rand()%100/50.0;
+        pg_coord.at(i).at(1) = rand()%100/50.0;
+    }
+
+    std::cout << "initial coord" << std::endl;
+    for (std::vector< std::vector<CoordType> >::iterator it1=pg_coord.begin();\
+        it1!=pg_coord.end();
+        ++it1)
+    {
+        for (std::vector<CoordType>::iterator it2=(*it1).begin();\
+        it2!=(*it1).end();
+        ++it2)
+        {
+            std::cout << *it2 << " ";
+        }
+        std::cout << std::endl;
+    }
+    stress_majorization_with_pg(pg, dist_mat, w_lap, pg_coord);
+    std::cout << "after sm coord" << std::endl;
+    for (std::vector< std::vector<CoordType> >::iterator it1=pg_coord.begin();\
+        it1!=pg_coord.end();
+        ++it1)
+    {
+        for (std::vector<CoordType>::iterator it2=(*it1).begin();\
+        it2!=(*it1).end();
+        ++it2)
+        {
+            std::cout << *it2 << " ";
+        }
+        std::cout << std::endl;
+    }
+
+
+    return SUCCESS_PARTITION_PLACEMENT;
+}
+
+
+/******************************************************************************
  *                           Main Process                                     *
  ******************************************************************************/
 int smpor(Graph::Graph& g, std::vector< std::vector<CoordType> >& coord,\
@@ -128,6 +205,15 @@ int smpor(Graph::Graph& g, std::vector< std::vector<CoordType> >& coord,\
     PGraph pg;
     
     create_pgraph(pg, g, partition, partNum);
+
+    // draw the layout of p-graph: give the coordinates
+    std::vector< std::vector<CoordType> > pg_coord(pg.get_num_vtxs(),\
+                                        std::vector<CoordType> (2, INIT_COORD));
+    stress_majorization_with_node_overlap_removal(pg, pg_coord);
+
+
+    // matching the partition coordinates to the overall coordinates
+    
 
     return SUCCESS_SMPOR;
 

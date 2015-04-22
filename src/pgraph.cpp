@@ -50,10 +50,40 @@ VtxType PGraph::get_center_id(VtxType pID)
 }
 
 
+/****************************
+ * get the radius of p-node *
+ ****************************/
+WgtType PGraph::get_radius(VtxType pID)
+{
+    return vtxs.at(pID).pRadius;
+}
 
+
+
+/***************************************
+ * get the number of vertices in graph *
+ ***************************************/
 int PGraph::get_num_vtxs()
 {
     return vtxs.size();
+}
+
+
+/*****************************************
+ * get the neighbors of the given vertex *
+ *****************************************/
+std::vector<VtxType> PGraph::adj(VtxType s)
+{
+    return vtxs.at(s).edges;
+}
+
+
+/*************************************************
+ * get the neighbors' weight of the given vertex *
+ *************************************************/
+std::vector<WgtType> PGraph::adj_wgts(VtxType s)
+{
+    return vtxs.at(s).pWgts;
 }
 
 
