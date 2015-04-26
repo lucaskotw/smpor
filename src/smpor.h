@@ -41,9 +41,8 @@ void match_partition_coord(std::vector<int>& partition_vtxs,\
 /****************
  * Main Process *
  ****************/
-int smpor(Graph::Graph& g,\
-          std::vector< std::vector<CoordType> >& coord,\
-          std::vector<int>& partition,\
-          int partNum);
+int smpor(Graph::Graph& g, PGraph::PGraph& pg,\
+    std::vector< std::vector<CoordType> >& coord,\
+    std::vector<int>& partition, int partNum);
 
 #endif

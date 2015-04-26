@@ -12,9 +12,12 @@ extern "C"
     #include <stdlib.h>  // for exit()
 }
 
+#include <IL/ilut.h> // for output png
+
 
 #include "config.h"
 #include <vector>
+#include <iostream>
 #include <GLFW/glfw3.h>
 
 

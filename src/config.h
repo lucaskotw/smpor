@@ -33,4 +33,8 @@
 #define SUCCESS_SM                    0
 #define SUCCESS_SMPOR                 0
 
+
+/* ports and boundary assignment stage */
+#define SUCCESS_PBA 0
+
 #endif

@@ -13,6 +13,7 @@
 #include "load_graph.h"
 #include "partition.h"
 #include "smpor.h"
+#include "pba.h"
 #include "draw_layout.h"
 
 int main(int argc, char** argv)
@@ -39,25 +40,19 @@ int main(int argc, char** argv)
     /* Stress Majorization */
     std::vector< std::vector<CoordType> > coord(g.get_num_vtxs(),\
                                                 std::vector<CoordType>(2));
-    smpor(g, coord, partition, PARTITION_NUM);
+    PGraph pg; // for further use in ports and boundary assignments
+    smpor(g, pg, coord, partition, PARTITION_NUM);
 
     /* port and boundary assignment - create edges */
     std::vector< std::vector<VtxType> > edges;
-    std::vector<VtxType> adj;
-    std::vector<VtxType> pair(2);
-    for (int vtx=0; vtx<g.get_num_vtxs(); ++vtx)
-    {
-        adj = g.adj(vtx);
-        for (int nb=0; nb<adj.size(); ++nb)
-        {
-            if (vtx<adj.at(nb))
-            {
-                pair.at(0) = vtx;
-                pair.at(1) = adj.at(nb);
-                edges.push_back(pair);
-            }
-        }
-    }
+    std::vector< std::vector<VtxType> > ports;
+    std::vector< std::vector<VtxType> > boundary_pts;
+    std::vector< std::vector<CoordType> > ports_coords;
+    std::vector< std::vector<CoordType> > boundary_pts_coords;
+    port_and_boundary_assignment(g, pg, partition, coord, \
+        edges, ports, boundary_pts, ports_coords, boundary_pts_coords);
+    
+    
 
 
     /* Ended of the elapsed time measure */

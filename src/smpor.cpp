@@ -135,7 +135,8 @@ void distance_matrix_with_modifed_radius(PGraph::PGraph& pg, DenseMat& distMat)
             if (v != n_v)
             {
                 if ( (pg.get_radius(v)+pg.get_radius(n_v)) > dist.at(n_v) )
-                    dist.at(n_v) = pg.get_radius(v)+pg.get_radius(n_v);
+                    dist.at(n_v) = pg.get_radius(v)+pg.get_radius(n_v)\
+                                 + 2*PORT_BOUNDARY_OFFSET;
             }
 
         }
@@ -335,10 +336,11 @@ int stress_majorization_of_small_graph(std::vector<Graph>& sg_vec,\
 /******************************************************************************
  *                           Main Process                                     *
  ******************************************************************************/
-int smpor(Graph::Graph& g, std::vector< std::vector<CoordType> >& coord,\
+int smpor(Graph::Graph& g, PGraph::PGraph& pg,\
+    std::vector< std::vector<CoordType> >& coord,\
     std::vector<int>& partition, int partNum)
 {
-    PGraph pg;
+
     std::vector<Graph> sg_vec(partNum, Graph(0));
 
     create_pgraph(pg, sg_vec, g, partition, partNum);

@@ -13,6 +13,7 @@ CoordType absolute(CoordType coordVal)
 double get_drawing_width(std::vector< std::vector<CoordType> >& coord)
 {
     double max_width = MAX_WIDTH_INIT_VAL;
+    double curr_val;
     for (std::vector< std::vector<CoordType> >::iterator itr=coord.begin();\
         itr!=coord.end();\
         ++itr)
@@ -21,7 +22,10 @@ double get_drawing_width(std::vector< std::vector<CoordType> >& coord)
             itc!=(*itr).end(); \
             ++itc)
         {
-            if ( absolute( *itc ) > max_width) max_width = *itc;
+            if (*itc > 0) curr_val = *itc;
+            else curr_val = -(*itc);
+            if ( curr_val > max_width) max_width = curr_val;
+            // if ( absolute( *itc ) > max_width) max_width = *itc;
         }
     }
     return max_width;
@@ -50,10 +54,11 @@ void draw_vertices(std::vector< std::vector<CoordType> >& coord, \
     std::vector<PartType>& partition)
 {
   double coord_max = get_drawing_width(coord);
+  std::cout << coord_max << std::endl;
 
   glBegin(GL_POINTS);
 
-    for (int i=0; i<coord[0].size(); ++i) {
+    for (int i=0; i<coord.size(); ++i) {
         switch(partition.at(i))
         {
             case 0:
@@ -74,6 +79,7 @@ void draw_vertices(std::vector< std::vector<CoordType> >& coord, \
         }
 
         glVertex2f(coord[i][0]/coord_max, coord[i][1]/coord_max);
+        std::cout << coord[i][0]/coord_max << ", " << coord[i][1]/coord_max << std::endl;
     }
 
   glEnd();
@@ -92,7 +98,7 @@ void draw_edges(std::vector< std::vector<VtxType> >& edges, \
     glColor3f(0.5f, 0.5f, 0.5f);
     double pt1;
     double pt2;
-    for (int i=0; i<edges[0].size(); ++i) {
+    for (int i=0; i<edges.size(); ++i) {
       pt1 = edges[i][0];
       pt2 = edges[i][1];
       glVertex2f(coord[pt1][0]/coord_max, coord[pt1][1]/coord_max);
@@ -117,6 +123,9 @@ void draw_layout(std::vector< std::vector<VtxType> >& edges, \
   if (!glfwInit())
       exit(1);
       // return -1;
+
+  /* Initalize DevIL */
+  // ilutRenderer(ILUT_OPENGL);
 
   /* Create a windowed mode window and its OpenGL context */
   window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "2D Stress Layout", NULL, NULL);
@@ -144,9 +153,8 @@ void draw_layout(std::vector< std::vector<VtxType> >& edges, \
     glClearColor( 1.0f, 1.0f, 1.0f, 1.0f );
     glClear(GL_COLOR_BUFFER_BIT);
 
-
-    draw_vertices(coord, partition);
     draw_edges(edges, coord);
+    draw_vertices(coord, partition);
 
     
 
