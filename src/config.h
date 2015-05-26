@@ -37,7 +37,7 @@
 #define SUCCESS_CREATE_SMALL_GRAPH_LIST         0
 #define SUCCESS_BFS                   0
 #define SUCCESS_PARTITION_PLACEMENT   0
-#define SUCCESS_SMALL_GRAPH_PLACEMENT 0
+#define SUCCESS_INTRA_STRESS_MAJORIZATION 0
 #define SUCCESS_SM_PG                 0
 #define SUCCESS_SM                    0
 #define SUCCESS_SMPOR                 0

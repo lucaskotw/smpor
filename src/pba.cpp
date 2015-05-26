@@ -27,7 +27,7 @@ void fill_edges(Graph::Graph& g, std::vector< std::vector<VtxType> > & edges)
 
 
 void define_ports_and_boundary_pts(std::vector< std::vector<VtxType> >& edges,\
-    std::vector<int>& partition,\
+    std::vector<int>& clusters,\
     std::vector< std::vector<VtxType> >& ports,\
     std::vector< std::vector<VtxType> >& boundary_pts)
 {
@@ -66,7 +66,7 @@ void define_ports_and_boundary_pts(std::vector< std::vector<VtxType> >& edges,\
 
 
 void find_boundary_point(PGraph::PGraph & pg,\
-    std::vector<int>& partition,\
+    std::vector<int>& clusters,\
     std::vector< std::vector<CoordType> >& coord,\
     VtxType corrPt,\
     std::vector<CoordType>& boundary_pt_coord)
@@ -102,7 +102,7 @@ void find_boundary_point(PGraph::PGraph & pg,\
 
 
 void find_port(PGraph::PGraph & pg,\
-    std::vector<int>& partition,\
+    std::vector<int>& clusters,\
     VtxType endPt1, VtxType endPt2,\
     std::vector< std::vector<CoordType> >& coord,\
     std::vector<CoordType>& port1_coord,\
@@ -144,7 +144,7 @@ void find_port(PGraph::PGraph & pg,\
 
 void assign_ports_and_boundary_pts(PGraph::PGraph & pg,\
     std::vector< std::vector<VtxType> >& edges,\
-    std::vector<int>& partition,\
+    std::vector<int>& clusters,\
     std::vector< std::vector<CoordType> >& coord,\
     std::vector< std::vector<VtxType> >& ports,\
     std::vector< std::vector<VtxType> >& boundary_pts,\
@@ -190,7 +190,7 @@ void assign_ports_and_boundary_pts(PGraph::PGraph & pg,\
  *                       Calculate Contrl Points                              *
  ******************************************************************************/
 void calculate_control_points(PGraph::PGraph& pg,\
-    std::vector<int>& partition,\
+    std::vector<int>& clusters,\
     std::vector< std::vector<CoordType> > & coord,\
     std::vector< std::vector<VtxType> > & edges,\
     std::vector< std::vector<VtxType> > & ports,\
@@ -277,7 +277,7 @@ void calculate_control_points(PGraph::PGraph& pg,\
  *                            Main Process                                    *
  ******************************************************************************/
 int port_and_boundary_assignment(Graph::Graph& g, PGraph::PGraph& pg,\
-    std::vector<int>& partition,\
+    std::vector<int>& clusters,\
     std::vector< std::vector<CoordType> > & coord,\
     std::vector< std::vector<VtxType> > & edges,\
     std::vector< std::vector<VtxType> > & ports,\

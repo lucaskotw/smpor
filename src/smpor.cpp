@@ -10,7 +10,7 @@
  * minimal of maximal distance
  */
 void find_p_center_radius(Graph::Graph& g, std::vector<Graph>& sg_vec,\
-                          std::vector<int>& partition,\
+                          std::vector<int>& clusters,\
                           int partID, VtxType& pCenter, WgtType& pRadius)
 {
     
@@ -93,7 +93,7 @@ void add_p_graph_edges(PGraph::PGraph& pg, Graph::Graph& g)
 
 
 int create_small_graph_list(Graph::Graph& g, std::vector<Graph>& sg_vec,\
-    std::vector<int>& partition, int partNum)
+    std::vector<int>& clusters, int nCluster)
 {
     // Steps
     // 1) with p-center and p-radius assign
@@ -103,7 +103,7 @@ int create_small_graph_list(Graph::Graph& g, std::vector<Graph>& sg_vec,\
     // add p-graph's p-node
     // VtxType p_center;
     // WgtType p_radius;
-    // for (int p=0; p<partNum; ++p)
+    // for (int p=0; p<nCluster; ++p)
     // {
     //     find_p_center_radius(g, sg_vec, partition, p, p_center, p_radius);
     //     pg.add_node(p_center, p_radius);
@@ -112,7 +112,7 @@ int create_small_graph_list(Graph::Graph& g, std::vector<Graph>& sg_vec,\
     // // add p-graph's edges
     // add_p_graph_edges(pg, g);
 
-    // std::cout << "pg size = " << partNum << std::endl;
+    // std::cout << "pg size = " << nCluster << std::endl;
     // pg.print_graph();
     return SUCCESS_CREATE_SMALL_GRAPH_LIST;
 }
@@ -214,130 +214,99 @@ int stress_majorization_with_node_overlap_removal(PGraph::PGraph& pg,\
 
 /******************************************************************************
  *                       Stress Majorization                                  *
- *                    of small graph components                               *
+ *                         inside clusters                                    *
  ******************************************************************************/
-void match_partition_coord(std::vector<int>& partition_vtxs,\
-    std::vector< std::vector<CoordType> >& partition_coords,\
-    std::vector< std::vector<CoordType> >& pg_coord,\
-    std::vector< std::vector<CoordType> >& coord,\
-    int partID,\
-    int pCenter)
+static
+void create_cluster_dist_mat(DenseMat& distMat,\
+                            std::vector<VtxType>& cluster_vtxs,\
+                            DenseMat& clusterDistMat)
 {
-    // assign the partition center coord
-    int p_center = partition_vtxs.at(pCenter);
-    coord.at(p_center).at(0) = pg_coord.at(partID).at(0);
-    coord.at(p_center).at(1) = pg_coord.at(partID).at(1);
+    // Steps
+    // 1. resize cluster distance matrix
+    // 2. match the distance from distMat to clusterDistMat
 
-    // assign the rest
-    for (int i=0; i<partition_vtxs.size(); ++i)
+    // Step 1
+    clusterDistMat.resize(cluster_vtxs.size(), cluster_vtxs.size());
+
+    // Step 2
+    int rowIdx;
+    int colIdx;
+    for (int c=0; c<cluster_vtxs.size(); ++c)
     {
-        if (partition_vtxs.at(i) != p_center)
+        for (int r=0; r<cluster_vtxs.size(); ++r)
         {
-            coord.at(partition_vtxs.at(i)).at(0) =\
-                partition_coords.at(i).at(0) + coord.at(p_center).at(0);
-            coord.at(partition_vtxs.at(i)).at(1) =\
-                partition_coords.at(i).at(1) + coord.at(p_center).at(1);
+            rowIdx = cluster_vtxs.at(r);
+            colIdx = cluster_vtxs.at(c);
+            clusterDistMat(r, c) = distMat(rowIdx, colIdx);
         }
     }
 }
 
 
-int stress_majorization_of_small_graph(std::vector<Graph>& sg_vec,\
-                                PGraph::PGraph& pg,\
-                                std::vector<int>& partition,\
-                                std::vector< std::vector<CoordType> >& pg_coord,\
-                                std::vector< std::vector<CoordType> >& coord,\
-                                int partNum)
+static
+void match_cluster_coord(std::vector<VtxType>& cluster_vtxs,\
+                        std::vector< std::vector<CoordType> >& intra_coord,
+                        std::vector< std::vector<CoordType> >& coord)
 {
-    std::vector<VtxType> partition_vtxs; // id: vtx id of partition graph 
-                                         // val: vtx id in whole graph
-    std::vector< std::vector<CoordType> > partition_coords;
-    DenseMat dist_mat;
-    DenseMat w_lap;
-    VtxType p_center;
+    // Assign intro_coord to coord based on cluster_vtxs
+    int vtx_id;
+    for (int i=0; i<cluster_vtxs.size(); ++i)
+    {
+        vtx_id = cluster_vtxs.at(i);
+        coord.at(vtx_id).at(0) = intra_coord.at(i).at(0);
+        coord.at(vtx_id).at(1) = intra_coord.at(i).at(1);
+    }
+}
+
+
+static
+int intra_stress_majorization(std::vector<int>& clusters, int nCluster,\
+                            DenseMat& distMat,\
+                            std::vector< std::vector<CoordType> >& coord)
+{
+    // Steps
+    // Forloop from 0 to nCluster-1
+    //     1. get the nodes inside cluster O(N)
+    //     2. layout inside cluster: O(stress majorization layout)
+    //     3. put the coordinates to the coord: O(N)
+
+    std::vector< std::vector<CoordType> >& intra_coord;
+    std::vector<VtxType> cluster_vtxs; // id: vtx id of clustered graph
+                                       // val: vtx id in whole graph
+    DenseMat cluster_dist_mat;
     
-
-    for (int p=0; p<partNum; ++p)
+    for (int p=0; p<nCluster; ++p)
     {
-        partition_vtxs.resize(0);
+        // loop step 1
+        cluster_vtxs.resize(0);
+        for (int i=0; i<clusters.size(); ++i)
+            if (clusters.at(i) == p) cluster_vtxs.push_back(i);
 
-        for (int i=0; i<partition.size(); ++i)
-            if (partition.at(i) == p) partition_vtxs.push_back(i);
-        partition_coords.resize(partition_vtxs.size(), std::vector<CoordType>(2));
+        // loop step 2
+        create_cluster_dist_mat(distMat, cluster_vtxs, cluster_dist_mat);
+        stress_majorization(cluster_dist_mat.rows(), cluster_dist_mat,\
+                            intra_coord);
 
-        srand(1); // set seed to 1
-        for (int i=0; i<partition_coords.size(); ++i) {
-            partition_coords.at(i).at(0) = rand()%100/50.0;
-            partition_coords.at(i).at(1) = rand()%100/50.0;
-        }
-        dist_mat.resize(partition_vtxs.size(), partition_vtxs.size());
-        w_lap.resize(partition_vtxs.size(), partition_vtxs.size());
-        distance_matrix(sg_vec.at(p), dist_mat);
-        w_lap_normal(sg_vec.at(p), dist_mat, w_lap);
-        if (p==0)
-        {
-            std::cout << "dist mat" << std::endl;
-            std::cout << dist_mat << std::endl;    
-        }
-
-        // find pcenter in partition_vtxs
-        p_center = std::find( partition_vtxs.begin(), partition_vtxs.end(), pg.get_center_id(p) ) - partition_vtxs.begin();
-        std::cout << "p-center in original graph = " << pg.get_center_id(p) << std::endl;
-        std::cout << "p-center in partition vtx = " << p_center << std::endl;
-
-        // here, pCenter is the vtx id in partition_vtxs
-        
-        stress_majorization(sg_vec.at(p), dist_mat, w_lap, partition_coords, p_center);
-        if (p==1)
-        {
-            std::cout << "after sm coord" << std::endl;
-            for (std::vector< std::vector<CoordType> >::iterator it1=partition_coords.begin();\
-                it1!=partition_coords.end();
-                ++it1)
-            {
-                for (std::vector<CoordType>::iterator it2=(*it1).begin();\
-                it2!=(*it1).end();
-                ++it2)
-                {
-                    std::cout << *it2 << " ";
-                }
-                std::cout << std::endl;
-            }
-        }
-
-        match_partition_coord(partition_vtxs, partition_coords, pg_coord, coord,\
-                              p, p_center);
+        // loop step 3
+        match_cluster_coord(cluster_vtxs, intra_coord, coord);
+       
     }
 
-    std::cout << "overall sm coord" << std::endl;
-    for (std::vector< std::vector<CoordType> >::iterator it1=coord.begin();\
-        it1!=coord.end();
-        ++it1)
-    {
-        for (std::vector<CoordType>::iterator it2=(*it1).begin();\
-        it2!=(*it1).end();
-        ++it2)
-        {
-            std::cout << *it2 << " ";
-        }
-        std::cout << std::endl;
-    }
-
-    return SUCCESS_SMALL_GRAPH_PLACEMENT;
+    return SUCCESS_INTRA_STRESS_MAJORIZATION;
 }
 
 
 /******************************************************************************
  *                           Main Process                                     *
  ******************************************************************************/
-int smpor(Graph::Graph& g,
+int smpor(int graphSize, DenseMat& distMat,\
     std::vector< std::vector<CoordType> >& coord,\
     std::vector< std::vector<CoordType> >& center_coord,\
     std::vector< WgtType >& radius,\
-    std::vector<int>& partition, int partNum)
+    std::vector<int>& clusters, int nCluster)
 {
 
-    std::vector<Graph> sg_vec(partNum, Graph(0));
+    std::vector<Graph> sg_vec(nCluster, Graph(0));
 
     // Steps
     // 1. stress majorization inside clusters.
@@ -346,7 +315,8 @@ int smpor(Graph::Graph& g,
     // 4. shift nodes with cluster respect to the centers.
 
     // Step 1
-    create_small_graph_list(g, sg_vec, partition, partNum);
+    // create_small_graph_list(g, sg_vec, partition, nCluster);
+    intra_stress_majorization(clusters, nCluster, distMat, coord);
 
 
 
@@ -358,8 +328,8 @@ int smpor(Graph::Graph& g,
 
     // matching the partition coordinates to the overall coordinates
     // partition graph for easily p-center
-    // stress_majorization_of_small_graph(sg_vec, pg, partition, pg_coord,\
-    //                                    coord, partNum);
+    // intra_stress_majorization(sg_vec, pg, partition, pg_coord,\
+    //                                    coord, nCluster);
 
     return SUCCESS_SMPOR;
 

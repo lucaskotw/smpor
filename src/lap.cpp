@@ -11,11 +11,11 @@ double inv_norm(DenseMat& coord, int iR, int jR)
 
 
 
-void w_lap_normal(Graph::Graph& g, DenseMat& dist, DenseMat& lap)
+void w_lap_normal(int graphSize, DenseMat& dist, DenseMat& lap)
 {
     lap.fill(0);
     DenseVec dist_row;
-    for (int i=0; i<g.get_num_vtxs(); ++i) {
+    for (int i=0; i<graphSize; ++i) {
 
         // if node j is node i's neighbor
         dist_row = dist.row(i);
@@ -33,10 +33,10 @@ void w_lap_normal(Graph::Graph& g, DenseMat& dist, DenseMat& lap)
 }
 
 
-void iter_lap_normal(Graph::Graph& g, DenseMat& dist,\
+void iter_lap_normal(int graphSize, DenseMat& dist,\
         DenseMat& lap, DenseMat& coord)
 {
-    int n_vtxs = g.get_num_vtxs();
+    int n_vtxs = graphSize;
     lap.fill(0);
     DenseVec dist_row(n_vtxs);
     for (int i=0; i<n_vtxs; ++i) {

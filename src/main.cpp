@@ -96,7 +96,7 @@ int main(int argc, char** argv)
     std::vector< std::vector<CoordType> > center_coord(3); // 3 stands for
                                                            // partition number
     std::vector< WgtType > radius(3);
-    smpor(g, coord, center_coord, radius, partition, 3);
+    smpor(g.get_num_vtxs(), dist_mat, coord, center_coord, radius, partition, 3);
 
     // /* port and boundary assignment - create edges */
     // std::vector< std::vector<VtxType> > edges;
