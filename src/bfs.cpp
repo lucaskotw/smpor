@@ -1,5 +1,6 @@
 #include "bfs.h"
 
+
 int bfs(Graph::Graph& g, int gSize, VtxType s, std::vector<WgtType>& dist)
 {
 
@@ -47,8 +48,8 @@ int bfs(Graph::Graph& g, int gSize, VtxType s, std::vector<WgtType>& dist)
     // for non-connected components
     for (int i=0; i<dist.size(); ++i)
     {
-        // [todo]: explained 10?
-        if (!explored.at(i)) dist.at(i) = farthest_dist + 10;
+        // [todo]: explained 1?
+        if (!explored.at(i)) dist.at(i) = farthest_dist + DISCONNECTED_OFFSET;
 
     }
 
@@ -104,7 +105,7 @@ int bfs_pg(PGraph::PGraph& pg, int pgSize, VtxType s, std::vector<WgtType>& dist
     for (int i=0; i<dist.size(); ++i)
     {
         // [todo]: explained 10?
-        if (!explored.at(i)) dist.at(i) = farthest_dist + 10;
+        if (!explored.at(i)) dist.at(i) = farthest_dist + DISCONNECTED_OFFSET;
 
     }
 

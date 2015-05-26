@@ -187,6 +187,93 @@ void assign_ports_and_boundary_pts(PGraph::PGraph & pg,\
 
 
 /******************************************************************************
+ *                       Calculate Contrl Points                              *
+ ******************************************************************************/
+void calculate_control_points(PGraph::PGraph& pg,\
+    std::vector<int>& partition,\
+    std::vector< std::vector<CoordType> > & coord,\
+    std::vector< std::vector<VtxType> > & edges,\
+    std::vector< std::vector<VtxType> > & ports,\
+    std::vector< std::vector<VtxType> > & boundary_pts,\
+    std::vector< std::vector<CoordType> > & ports_coords,\
+    std::vector< std::vector<CoordType> > & boundary_pts_coords,\
+    std::vector< std::vector<CoordType> >& ctrl_pts_coords)
+{
+    VtxType center_id;
+    std::vector<CoordType> center_coord(2);
+    double dist_to_center;
+    double cos_theta;
+    double sin_theta;
+    double radius;
+    std::vector<CoordType> middle_pt(2);
+    std::vector<CoordType> ctrl_pt(2);
+
+    int p_cnt = -1;
+    int b_cnt = -1;
+
+    for (int i=0; i<ports.size(); ++i)
+    {
+        if (ports.at(i).at(0) != NULL_PORT)
+        {
+            // calculate first middle points
+            center_id = pg.get_center_id( partition.at(edges.at(i).at(0)) );
+            center_coord = coord.at(center_id);
+
+            ++p_cnt;
+            ++b_cnt;
+            middle_pt.at(0) = \
+                (ports_coords.at(p_cnt).at(0)+boundary_pts_coords.at(b_cnt).at(0))/2;
+            middle_pt.at(1) = \
+                (ports_coords.at(p_cnt).at(1)+boundary_pts_coords.at(b_cnt).at(1))/2;
+            // start from center of partition
+            // calculate the angle refer to center of partition
+            dist_to_center  = sqrt(\
+                pow( (middle_pt.at(0)-center_coord.at(0)), 2) + \
+                pow( (middle_pt.at(1)-center_coord.at(1)), 2)\
+            );        
+            cos_theta = (middle_pt.at(0)-center_coord.at(0)) / dist_to_center;
+            sin_theta = (middle_pt.at(1)-center_coord.at(1)) / dist_to_center;
+            radius = pg.get_radius( partition.at(edges.at(i).at(0)) );
+            ctrl_pt.at(0) = center_coord.at(0) +\
+                (radius+PORT_BOUNDARY_OFFSET)*cos_theta;
+            ctrl_pt.at(1) = center_coord.at(1) +\
+                (radius+PORT_BOUNDARY_OFFSET)*cos_theta;
+            ctrl_pts_coords.push_back(ctrl_pt);
+
+
+
+            // calculate second middle points
+            center_id = pg.get_center_id( partition.at(edges.at(i).at(1)) );
+            center_coord = coord.at(center_id);
+            ++p_cnt;
+            ++b_cnt;
+            middle_pt.at(0) = \
+                (ports_coords.at(p_cnt).at(0)+boundary_pts_coords.at(b_cnt).at(0))/2;
+            middle_pt.at(1) = \
+                (ports_coords.at(p_cnt).at(1)+boundary_pts_coords.at(b_cnt).at(1))/2;
+            // start from center of partition
+            // calculate the angle refer to center of partition
+            dist_to_center  = sqrt(\
+                pow( (middle_pt.at(0)-center_coord.at(0)), 2) + \
+                pow( (middle_pt.at(1)-center_coord.at(1)), 2)\
+            );        
+            cos_theta = (middle_pt.at(0)-center_coord.at(0)) / dist_to_center;
+            sin_theta = (middle_pt.at(1)-center_coord.at(1)) / dist_to_center;
+            radius = pg.get_radius( partition.at(edges.at(i).at(1)) );
+            ctrl_pt.at(0) = center_coord.at(0) +\
+                (radius+PORT_BOUNDARY_OFFSET)*cos_theta;
+            ctrl_pt.at(1) = center_coord.at(1) +\
+                (radius+PORT_BOUNDARY_OFFSET)*cos_theta;
+            ctrl_pts_coords.push_back(ctrl_pt);
+
+        }
+
+
+    }
+}
+
+
+/******************************************************************************
  *                            Main Process                                    *
  ******************************************************************************/
 int port_and_boundary_assignment(Graph::Graph& g, PGraph::PGraph& pg,\
@@ -196,7 +283,8 @@ int port_and_boundary_assignment(Graph::Graph& g, PGraph::PGraph& pg,\
     std::vector< std::vector<VtxType> > & ports,\
     std::vector< std::vector<VtxType> > & boundary_pts,\
     std::vector< std::vector<CoordType> > & ports_coords,\
-    std::vector< std::vector<CoordType> > & boundary_pts_coords)
+    std::vector< std::vector<CoordType> > & boundary_pts_coords,\
+    std::vector< std::vector<CoordType> >& ctrl_pts_coords)
 {
     // ports and boundary_pts
     // 1) id: edge's row id
@@ -215,6 +303,9 @@ int port_and_boundary_assignment(Graph::Graph& g, PGraph::PGraph& pg,\
     define_ports_and_boundary_pts(edges, partition, ports, boundary_pts);
     assign_ports_and_boundary_pts(pg, edges, partition, coord,\
         ports, boundary_pts, ports_coords, boundary_pts_coords);
+
+    calculate_control_points(pg, partition, coord, edges, ports, boundary_pts,\
+        ports_coords, boundary_pts_coords, ctrl_pts_coords);
 
 
     return SUCCESS_PBA;

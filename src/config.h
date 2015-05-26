@@ -2,6 +2,15 @@
 #define CONFIG_H
 
 
+/**********
+ * OFFSET *
+ **********/
+#define PORT_BOUNDARY_OFFSET 1
+
+#define NULL_PORT        -1
+#define NULL_BOUNDARY_PT -1
+
+
 /*******************
  * Data Type Alias *
  *******************/
@@ -35,6 +44,7 @@
 
 
 /* ports and boundary assignment stage */
-#define SUCCESS_PBA 0
+#define SUCCESS_PBA  0
+#define SUCCESS_CTRL 0
 
 #endif

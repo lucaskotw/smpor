@@ -57,9 +57,9 @@ int stress_majorization(Graph::Graph & g,\
     coord_mat.block(1, 0, coord_mat.rows()-1, coord_mat.cols()) = iter_coord;
     double aft_stress = stress(distMat, coord_mat);
     stress_ratio = (pre_stress-aft_stress)/pre_stress;
-    std::cout << "round 0 previous stress = " << pre_stress << std::endl;
-    std::cout << "round 0 after stress = " << aft_stress << std::endl;
-    std::cout << "ratio = " << stress_ratio << std::endl;
+    // std::cout << "round 0 previous stress = " << pre_stress << std::endl;
+    // std::cout << "round 0 after stress = " << aft_stress << std::endl;
+    // std::cout << "ratio = " << stress_ratio << std::endl;
 
 
     // First Iteration
@@ -84,8 +84,8 @@ int stress_majorization(Graph::Graph & g,\
         aft_stress = stress(distMat, coord_mat);
         
         stress_ratio = (pre_stress-aft_stress)/pre_stress;
-        std::cout << "round " << i << " stress = " << aft_stress << std::endl;
-        std::cout << "ratio = " << (pre_stress-aft_stress)/pre_stress << std::endl;
+        // std::cout << "round " << i << " stress = " << aft_stress << std::endl;
+        // std::cout << "ratio = " << (pre_stress-aft_stress)/pre_stress << std::endl;
 
         if (stress_ratio < epsl) {
             break;
@@ -140,9 +140,9 @@ int stress_majorization_with_pg(PGraph::PGraph & pg,\
     coord_mat.block(1, 0, coord_mat.rows()-1, coord_mat.cols()) = iter_coord;
     double aft_stress = stress(distMat, coord_mat);
     stress_ratio = (pre_stress-aft_stress)/pre_stress;
-    std::cout << "round 0 previous stress = " << pre_stress << std::endl;
-    std::cout << "round 0 after stress = " << aft_stress << std::endl;
-    std::cout << "ratio = " << stress_ratio << std::endl;
+    // std::cout << "round 0 previous stress = " << pre_stress << std::endl;
+    // std::cout << "round 0 after stress = " << aft_stress << std::endl;
+    // std::cout << "ratio = " << stress_ratio << std::endl;
 
 
     // First Iteration
@@ -167,8 +167,8 @@ int stress_majorization_with_pg(PGraph::PGraph & pg,\
         aft_stress = stress(distMat, coord_mat);
         
         stress_ratio = (pre_stress-aft_stress)/pre_stress;
-        std::cout << "round " << i << " stress = " << aft_stress << std::endl;
-        std::cout << "ratio = " << (pre_stress-aft_stress)/pre_stress << std::endl;
+        // std::cout << "round " << i << " stress = " << aft_stress << std::endl;
+        // std::cout << "ratio = " << (pre_stress-aft_stress)/pre_stress << std::endl;
 
         if (stress_ratio < epsl) {
             break;

@@ -54,7 +54,7 @@ void draw_vertices(std::vector< std::vector<CoordType> >& coord, \
     std::vector<PartType>& partition)
 {
   double coord_max = get_drawing_width(coord);
-  std::cout << coord_max << std::endl;
+  // std::cout << coord_max << std::endl;
 
   glBegin(GL_POINTS);
 
@@ -62,16 +62,20 @@ void draw_vertices(std::vector< std::vector<CoordType> >& coord, \
         switch(partition.at(i))
         {
             case 0:
-                glColor3f(1.0f, 0.0f, 0.0f);  
+                glColor3f(1.0f, 0.0f, 0.0f);
+                // glColor3f(1.0f, 1.0f, 1.0f);
                 break;
             case 1:
-                glColor3f(0.0f, 1.0f, 0.0f);  
+                glColor3f(0.0f, 1.0f, 0.0f);
+                // glColor3f(1.0f, 1.0f, 1.0f);
                 break;
             case 2:
-                glColor3f(0.0f, 0.0f, 1.0f);  
+                glColor3f(0.0f, 0.0f, 1.0f);
+                // glColor3f(1.0f, 1.0f, 1.0f);
                 break;
             case 3:
-                glColor3f(0.0f, 0.0f, 0.0f);  
+                glColor3f(0.0f, 0.0f, 0.0f);
+                // glColor3f(1.0f, 1.0f, 1.0f);
                 break;
             default:
                 glColor3f(0.5f, 0.5f, 0.5f);  
@@ -79,41 +83,185 @@ void draw_vertices(std::vector< std::vector<CoordType> >& coord, \
         }
 
         glVertex2f(coord[i][0]/coord_max, coord[i][1]/coord_max);
-        std::cout << coord[i][0]/coord_max << ", " << coord[i][1]/coord_max << std::endl;
+        // std::cout << coord[i][0]/coord_max << ", " << coord[i][1]/coord_max << std::endl;
     }
 
   glEnd();
 }
 
 
+
+void draw_line(CoordType p1_x, CoordType p1_y,\
+               CoordType p2_x, CoordType p2_y)
+{
+    glBegin(GL_LINES);
+      glColor3f(0.5f, 0.5f, 0.5f);
+      glVertex2f(p1_x, p1_y);
+      glVertex2f(p2_x, p2_y);
+    glEnd();
+    glFlush();
+}
+
+
+void draw_bezier(CoordType p1_x, CoordType p1_y,\
+                 CoordType p2_x, CoordType p2_y,\
+                 CoordType ctrl_x, CoordType ctrl_y)
+{
+  CoordType pt_c_x;
+  CoordType pt_c_y;
+  CoordType pt_old_x = p1_x;
+  CoordType pt_old_y = p1_y;
+  for (double t=0.0; t <=1.0; t+=BEZIER_INCREMENT)
+  {
+    pt_c_x = pow((1-t), 2)*p1_x + 2*t*(1-t)*ctrl_x + pow(t, 2)*p2_x;
+    pt_c_y = pow((1-t), 2)*p1_y + 2*t*(1-t)*ctrl_y + pow(t, 2)*p2_y;
+    draw_line(pt_old_x, pt_old_y, pt_c_x, pt_c_y);
+    pt_old_x = pt_c_x;
+    pt_old_y = pt_c_y;
+
+  }
+}
+
 /*
- * This is only for "straight" edge
+ * draw the edges
  */
 void draw_edges(std::vector< std::vector<VtxType> >& edges, \
-    std::vector< std::vector<CoordType> >& coord)
+    std::vector< std::vector<CoordType> >& coord,\
+    std::vector< std::vector<VtxType> >& ports,\
+    std::vector< std::vector<VtxType> >& boundary_pts,\
+    std::vector< std::vector<CoordType> >& ports_coords,\
+    std::vector< std::vector<CoordType> >& boundary_pts_coords,\
+    std::vector< std::vector<CoordType> >& ctrl_pts_coords)
 {
   double coord_max = get_drawing_width(coord);
-  glBegin(GL_LINES);
 
-    glColor3f(0.5f, 0.5f, 0.5f);
-    double pt1;
-    double pt2;
-    for (int i=0; i<edges.size(); ++i) {
-      pt1 = edges[i][0];
-      pt2 = edges[i][1];
-      glVertex2f(coord[pt1][0]/coord_max, coord[pt1][1]/coord_max);
-      glVertex2f(coord[pt2][0]/coord_max, coord[pt2][1]/coord_max);
-      // std::cout << "edges size=" << i << std::endl;
+  double pt1;
+  double pt2;
+  int cnt = -1; // count current dealing port and boundary id
+  for (int i=0; i<edges.size(); ++i)
+  {
+    pt1 = edges.at(i).at(0);
+    pt2 = edges.at(i).at(1);
+    // draw those edges that doesn't have ports and boundary
+    if (ports.at(i).at(0) == NULL_PORT)
+    {
+
+      draw_line(coord.at(pt1).at(0)/coord_max, coord.at(pt1).at(1)/coord_max,\
+                coord.at(pt2).at(0)/coord_max, coord.at(pt2).at(1)/coord_max);
     }
-    
 
-  glEnd();
+    // draw those edges with ports and boundary
+    else
+    {
+
+      // // pt1 to b-pt1
+      // ++cnt;
+      // draw_line(coord.at(pt1).at(0)/coord_max, coord.at(pt1).at(1)/coord_max,\
+      //           boundary_pts_coords.at(cnt).at(0)/coord_max,\
+      //           boundary_pts_coords.at(cnt).at(1)/coord_max);
+
+      // // boundary-1 to port-1
+      // draw_bezier(boundary_pts_coords.at(cnt).at(0)/coord_max,\
+      //             boundary_pts_coords.at(cnt).at(1)/coord_max,\
+      //             ports_coords.at(cnt).at(0)/coord_max,\
+      //             ports_coords.at(cnt).at(1)/coord_max,\
+      //             ctrl_pts_coords.at(cnt).at(0)/coord_max,\
+      //             ctrl_pts_coords.at(cnt).at(1)/coord_max);
+
+      
+
+      // // port-1 to port-2
+      // draw_line(ports_coords.at(cnt).at(0)/coord_max,\
+      //           ports_coords.at(cnt).at(1)/coord_max,\
+      //           ports_coords.at(cnt+1).at(0)/coord_max,\
+      //           ports_coords.at(cnt+1).at(1)/coord_max);
+
+      // // port-2 to boundary-2
+      // ++cnt;
+      // draw_bezier(boundary_pts_coords.at(cnt).at(0)/coord_max,\
+      //             boundary_pts_coords.at(cnt).at(1)/coord_max,\
+      //             ports_coords.at(cnt).at(0)/coord_max,\
+      //             ports_coords.at(cnt).at(1)/coord_max,\
+      //             ctrl_pts_coords.at(cnt).at(0)/coord_max,\
+      //             ctrl_pts_coords.at(cnt).at(1)/coord_max);
+
+      // // boundary-2 to pt2
+      // draw_line(boundary_pts_coords.at(cnt).at(0)/coord_max,\
+      //           boundary_pts_coords.at(cnt).at(1)/coord_max,\
+      //           coord.at(pt2).at(0)/coord_max,\
+      //           coord.at(pt2).at(1)/coord_max);
+    }
+  }
+
+  
+
+
+}
+
+
+void draw_radius(std::vector< std::vector<CoordType> >& coord,\
+                 std::vector< std::vector<CoordType> >& centers,\
+                 std::vector<WgtType>& radius)
+{
+  double coord_max = get_drawing_width(coord);
+  double r;
+  for (int c=0; c<centers.size(); ++c)
+  {
+    // draw radius
+    r = radius.at(c);
+    glBegin(GL_LINE_LOOP);
+      switch(c)
+        {
+            case 0:
+                glColor3f(1.0f, 0.0f, 0.0f);
+                // glColor3f(1.0f, 1.0f, 1.0f);
+                break;
+            case 1:
+                glColor3f(0.0f, 1.0f, 0.0f);
+                // glColor3f(1.0f, 1.0f, 1.0f);
+                break;
+            case 2:
+                glColor3f(0.0f, 0.0f, 1.0f);
+                // glColor3f(1.0f, 1.0f, 1.0f);
+                break;
+            case 3:
+                glColor3f(0.0f, 0.0f, 0.0f);
+                // glColor3f(1.0f, 1.0f, 1.0f);
+                break;
+            default:
+                glColor3f(0.5f, 0.5f, 0.5f);  
+                break;
+        }
+      for (int i=0; i<360; i++)
+      {
+        float degInRad = i*M_PI/180;
+        glVertex2f((centers.at(c).at(0)+cos(degInRad)*r)/coord_max,\
+                   (centers.at(c).at(1)+sin(degInRad)*r)/coord_max);
+      }
+
+    glEnd();
+
+    // draw center
+    glPointSize(20);
+    glBegin(GL_POINTS);
+
+      glVertex2f(centers.at(c).at(0)/coord_max, centers.at(c).at(1)/coord_max);
+
+    glEnd();
+  }
 }
 
 
 void draw_layout(std::vector< std::vector<VtxType> >& edges, \
     std::vector< std::vector<CoordType> >& coord,
-    std::vector<PartType>& partition)
+    std::vector<PartType>& partition,\
+    std::vector< std::vector<VtxType> >& ports,\
+    std::vector< std::vector<VtxType> >& boundary_pts,\
+    std::vector< std::vector<CoordType> >& ports_coords,\
+    std::vector< std::vector<CoordType> >& boundary_pts_coords,\
+    std::vector< std::vector<CoordType> >& ctrl_pts_coords,\
+    std::vector< std::vector<CoordType> >& centers,\
+    std::vector<WgtType>& radius)
 {
 
 
@@ -153,8 +301,11 @@ void draw_layout(std::vector< std::vector<VtxType> >& edges, \
     glClearColor( 1.0f, 1.0f, 1.0f, 1.0f );
     glClear(GL_COLOR_BUFFER_BIT);
 
-    draw_edges(edges, coord);
+    draw_edges(edges, coord, ports, boundary_pts, ports_coords, boundary_pts_coords, ctrl_pts_coords);
     draw_vertices(coord, partition);
+
+    // for seeing the radius of partition
+    draw_radius(coord, centers, radius);
 
     
 

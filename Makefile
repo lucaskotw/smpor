@@ -14,20 +14,29 @@ SRCDIR = src
 OBJDIR = obj
 
 
-SOURCES  := $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*.c)
+CXXSOURCES  := $(wildcard $(SRCDIR)/*.cpp)
+CSOURCES  := $(wildcard $(SRCDIR)/*.c)
 INCLUDES := $(wildcard $(SRCDIR)/*.h)
-OBJECTS  := $(SOURCES:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
+CXXOBJECTS  := $(CXXSOURCES:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
+COBJECTS  := $(CSOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 
 
 
-
-$(OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.cpp
+$(CXXOBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.cpp
 	$(CXX) $(CFLAGS) $(IPATHS) $< -o $@
 	@echo "Compiled "$<" successfully!"
 
 
-$(TARGET): $(OBJECTS)
-	@$(LINKER) $@ $(LFLAGS) $(OBJECTS)
+$(COBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.c
+	$(CC) $(CFLAGS) $(IPATHS) $< -o $@
+	@echo "Compiled "$<" successfully!"
+
+
+
+$(TARGET): $(CXXOBJECTS) $(COBJECTS)
+	@$(LINKER) $@ $(LFLAGS) $(CXXOBJECTS) $(COBJECTS)
+
+	
 
 .PHONY: clean
 clean:

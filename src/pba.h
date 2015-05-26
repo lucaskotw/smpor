@@ -10,10 +10,6 @@
 #include "pgraph.h"
 
 
-#define NULL_PORT        -1
-#define NULL_BOUNDARY_PT -1
-
-
 void fill_edges(Graph::Graph& g, std::vector< std::vector<VtxType> > & edges);
 void define_ports_and_boundary_pts(std::vector< std::vector<VtxType> >& edges,\
     std::vector<int>& partition,\
@@ -37,6 +33,15 @@ void assign_ports_and_boundary_pts(PGraph::PGraph & pg,\
     std::vector< std::vector<VtxType> >& boundary_pts,\
     std::vector< std::vector<CoordType> > & ports_coords,\
     std::vector< std::vector<CoordType> > & boundary_pts_coords);
+void calculate_control_points(PGraph::PGraph& pg,\
+    std::vector<int>& partition,\
+    std::vector< std::vector<CoordType> > & coord,\
+    std::vector< std::vector<VtxType> > & edges,\
+    std::vector< std::vector<VtxType> > & ports,\
+    std::vector< std::vector<VtxType> > & boundary_pts,\
+    std::vector< std::vector<CoordType> > & ports_coords,\
+    std::vector< std::vector<CoordType> > & boundary_pts_coords,\
+    std::vector< std::vector<CoordType> >& ctrl_pts_coords);
 
 int port_and_boundary_assignment(Graph::Graph& g, PGraph::PGraph& pg,\
     std::vector<int>& partition,\
@@ -45,6 +50,7 @@ int port_and_boundary_assignment(Graph::Graph& g, PGraph::PGraph& pg,\
     std::vector< std::vector<VtxType> > & ports,\
     std::vector< std::vector<VtxType> > & boundary_pts,\
     std::vector< std::vector<CoordType> > & ports_coords,\
-    std::vector< std::vector<CoordType> > & boundary_pts_coords);
+    std::vector< std::vector<CoordType> > & boundary_pts_coords,\
+    std::vector< std::vector<CoordType> >& ctrl_pts_coords);
 
 #endif

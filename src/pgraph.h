@@ -7,8 +7,6 @@
 
 #include "config.h"
 
-#define PORT_BOUNDARY_OFFSET 1
-
 
 struct p_node
 {

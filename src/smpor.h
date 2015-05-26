@@ -38,6 +38,9 @@ void match_partition_coord(std::vector<int>& partition_vtxs,\
     int partID,\
     int pCenter);
 
+
+void distance_matrix(Graph::Graph& g, DenseMat& distMat);
+
 /****************
  * Main Process *
  ****************/

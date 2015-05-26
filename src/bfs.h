@@ -10,6 +10,7 @@
 
 
 #define VTX_NOT_CONNECTED -1
+#define DISCONNECTED_OFFSET 10
 
 
 
