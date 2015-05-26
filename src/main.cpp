@@ -12,7 +12,6 @@
 
 
 #include "load_graph.h"
-#include "partition.h"
 #include "distance.h"
 #include "smpor.h"
 #include "pba.h"
@@ -97,6 +96,20 @@ int main(int argc, char** argv)
                                                            // partition number
     std::vector< WgtType > radius(3);
     smpor(g.get_num_vtxs(), dist_mat, coord, center_coord, radius, partition, 3);
+
+    std::cout << "smpor coord" << std::endl;
+    for (std::vector< std::vector<CoordType> >::iterator it1=coord.begin();\
+        it1!=coord.end();
+        ++it1)
+    {
+        for (std::vector<CoordType>::iterator it2=(*it1).begin();\
+        it2!=(*it1).end();
+        ++it2)
+        {
+            std::cout << *it2 << " ";
+        }
+        std::cout << std::endl;
+    }
 
     // /* port and boundary assignment - create edges */
     // std::vector< std::vector<VtxType> > edges;

@@ -43,7 +43,7 @@ void define_ports_and_boundary_pts(std::vector< std::vector<VtxType> >& edges,\
         end_pt1 = edges.at(e).at(0);
         end_pt2 = edges.at(e).at(1);
 
-        if (partition.at(end_pt1) == partition.at(end_pt2))
+        if (clusters.at(end_pt1) == clusters.at(end_pt2))
         {
             port_pair.at(0)  = NULL_PORT;
             port_pair.at(1)  = NULL_PORT;
@@ -72,7 +72,7 @@ void find_boundary_point(PGraph::PGraph & pg,\
     std::vector<CoordType>& boundary_pt_coord)
 {
     VtxType center_id;
-    center_id = pg.get_center_id( partition.at(corrPt) );
+    center_id = pg.get_center_id( clusters.at(corrPt) );
 
     std::vector<CoordType> center_coord(2);
     center_coord = coord.at(center_id);
@@ -92,7 +92,7 @@ void find_boundary_point(PGraph::PGraph & pg,\
     sin_theta = (corr_pt_coord.at(1)-center_coord.at(1)) / dist_to_center;
 
     // boundary_point assignment
-    double radius = pg.get_radius( partition.at(corrPt) );
+    double radius = pg.get_radius( clusters.at(corrPt) );
     boundary_pt_coord.at(0) = center_coord.at(0) + radius*cos_theta;
     boundary_pt_coord.at(1) = center_coord.at(1) + radius*sin_theta;
 
@@ -126,13 +126,13 @@ void find_port(PGraph::PGraph & pg,\
     sin_theta = (end_pt1_coord.at(1)-end_pt2_coord.at(1)) / dist_to_pt1;
 
     // assign the port based on radius and offset
-    WgtType end_pt1_radius = pg.get_radius( partition.at(endPt1) );
+    WgtType end_pt1_radius = pg.get_radius( clusters.at(endPt1) );
     port1_coord.at(0) = end_pt1_coord.at(0) +\
         (end_pt1_radius+PORT_BOUNDARY_OFFSET)*cos_theta;
     port1_coord.at(1) = end_pt1_coord.at(1) +\
         (end_pt1_radius+PORT_BOUNDARY_OFFSET)*sin_theta;
 
-    WgtType end_pt2_radius = pg.get_radius( partition.at(endPt2) );
+    WgtType end_pt2_radius = pg.get_radius( clusters.at(endPt2) );
     port2_coord.at(0) = end_pt2_coord.at(0) -\
         (end_pt2_radius+PORT_BOUNDARY_OFFSET)*cos_theta;
     port2_coord.at(1) = end_pt2_coord.at(1) -\
@@ -157,10 +157,10 @@ void assign_ports_and_boundary_pts(PGraph::PGraph & pg,\
     {
         if (boundary_pts.at(bp).at(0) != NULL_BOUNDARY_PT)
         {
-            find_boundary_point(pg, partition, coord, edges.at(bp).at(0), boundary_pt_coord);
+            find_boundary_point(pg, clusters, coord, edges.at(bp).at(0), boundary_pt_coord);
             boundary_pts_coords.push_back(boundary_pt_coord);
 
-            find_boundary_point(pg, partition, coord, edges.at(bp).at(1), boundary_pt_coord);
+            find_boundary_point(pg, clusters, coord, edges.at(bp).at(1), boundary_pt_coord);
             boundary_pts_coords.push_back(boundary_pt_coord);
         }
             
@@ -173,7 +173,7 @@ void assign_ports_and_boundary_pts(PGraph::PGraph & pg,\
     {
         if (ports.at(p).at(0) != NULL_PORT)
         {
-            find_port(pg, partition, edges.at(p).at(0), edges.at(p).at(1),\
+            find_port(pg, clusters, edges.at(p).at(0), edges.at(p).at(1),\
                 coord, port1_coord, port2_coord);
             ports_coords.push_back(port1_coord);
             ports_coords.push_back(port2_coord);
@@ -216,7 +216,7 @@ void calculate_control_points(PGraph::PGraph& pg,\
         if (ports.at(i).at(0) != NULL_PORT)
         {
             // calculate first middle points
-            center_id = pg.get_center_id( partition.at(edges.at(i).at(0)) );
+            center_id = pg.get_center_id( clusters.at(edges.at(i).at(0)) );
             center_coord = coord.at(center_id);
 
             ++p_cnt;
@@ -225,15 +225,15 @@ void calculate_control_points(PGraph::PGraph& pg,\
                 (ports_coords.at(p_cnt).at(0)+boundary_pts_coords.at(b_cnt).at(0))/2;
             middle_pt.at(1) = \
                 (ports_coords.at(p_cnt).at(1)+boundary_pts_coords.at(b_cnt).at(1))/2;
-            // start from center of partition
-            // calculate the angle refer to center of partition
+            // start from center of clusters
+            // calculate the angle refer to center of clusters
             dist_to_center  = sqrt(\
                 pow( (middle_pt.at(0)-center_coord.at(0)), 2) + \
                 pow( (middle_pt.at(1)-center_coord.at(1)), 2)\
             );        
             cos_theta = (middle_pt.at(0)-center_coord.at(0)) / dist_to_center;
             sin_theta = (middle_pt.at(1)-center_coord.at(1)) / dist_to_center;
-            radius = pg.get_radius( partition.at(edges.at(i).at(0)) );
+            radius = pg.get_radius( clusters.at(edges.at(i).at(0)) );
             ctrl_pt.at(0) = center_coord.at(0) +\
                 (radius+PORT_BOUNDARY_OFFSET)*cos_theta;
             ctrl_pt.at(1) = center_coord.at(1) +\
@@ -243,7 +243,7 @@ void calculate_control_points(PGraph::PGraph& pg,\
 
 
             // calculate second middle points
-            center_id = pg.get_center_id( partition.at(edges.at(i).at(1)) );
+            center_id = pg.get_center_id( clusters.at(edges.at(i).at(1)) );
             center_coord = coord.at(center_id);
             ++p_cnt;
             ++b_cnt;
@@ -251,15 +251,15 @@ void calculate_control_points(PGraph::PGraph& pg,\
                 (ports_coords.at(p_cnt).at(0)+boundary_pts_coords.at(b_cnt).at(0))/2;
             middle_pt.at(1) = \
                 (ports_coords.at(p_cnt).at(1)+boundary_pts_coords.at(b_cnt).at(1))/2;
-            // start from center of partition
-            // calculate the angle refer to center of partition
+            // start from center of clusters
+            // calculate the angle refer to center of clusters
             dist_to_center  = sqrt(\
                 pow( (middle_pt.at(0)-center_coord.at(0)), 2) + \
                 pow( (middle_pt.at(1)-center_coord.at(1)), 2)\
             );        
             cos_theta = (middle_pt.at(0)-center_coord.at(0)) / dist_to_center;
             sin_theta = (middle_pt.at(1)-center_coord.at(1)) / dist_to_center;
-            radius = pg.get_radius( partition.at(edges.at(i).at(1)) );
+            radius = pg.get_radius( clusters.at(edges.at(i).at(1)) );
             ctrl_pt.at(0) = center_coord.at(0) +\
                 (radius+PORT_BOUNDARY_OFFSET)*cos_theta;
             ctrl_pt.at(1) = center_coord.at(1) +\
@@ -300,11 +300,11 @@ int port_and_boundary_assignment(Graph::Graph& g, PGraph::PGraph& pg,\
     // seperate the process of
     // 1) define ports and boundary-points id
     // 2) coordinates assignments
-    define_ports_and_boundary_pts(edges, partition, ports, boundary_pts);
-    assign_ports_and_boundary_pts(pg, edges, partition, coord,\
+    define_ports_and_boundary_pts(edges, clusters, ports, boundary_pts);
+    assign_ports_and_boundary_pts(pg, edges, clusters, coord,\
         ports, boundary_pts, ports_coords, boundary_pts_coords);
 
-    calculate_control_points(pg, partition, coord, edges, ports, boundary_pts,\
+    calculate_control_points(pg, clusters, coord, edges, ports, boundary_pts,\
         ports_coords, boundary_pts_coords, ctrl_pts_coords);
 
 

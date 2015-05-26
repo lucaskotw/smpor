@@ -51,7 +51,7 @@ int stress_majorization(int graphSize,\
     }
 
     // Step 2
-    DenseMat w_lap(g_size);
+    DenseMat w_lap(g_size, g_size);
     w_lap_normal(g_size, distMat, w_lap);
 
 
