@@ -8,13 +8,12 @@
 
 
 #define PARTITION_NUM 4
+#define DRAWING_DIM   2
 
-extern "C" {
-    #include "cluster.h"
-}
 
 #include "load_graph.h"
 #include "partition.h"
+#include "distance.h"
 #include "smpor.h"
 #include "pba.h"
 #include "draw_layout.h"
@@ -92,9 +91,12 @@ int main(int argc, char** argv)
 
     /* Stress Majorization */
     std::vector< std::vector<CoordType> > coord(g.get_num_vtxs(),\
-                                                std::vector<CoordType>(2));
-    PGraph pg; // for further use in ports and boundary assignments
-    smpor(g, pg, coord, partition, 3);
+                                                std::vector<CoordType>(DRAWING_DIM));
+
+    std::vector< std::vector<CoordType> > center_coord(3); // 3 stands for
+                                                           // partition number
+    std::vector< WgtType > radius(3);
+    smpor(g, coord, center_coord, radius, partition, 3);
 
     // /* port and boundary assignment - create edges */
     // std::vector< std::vector<VtxType> > edges;

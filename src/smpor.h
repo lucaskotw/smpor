@@ -28,7 +28,7 @@ void find_p_center_radius(Graph::Graph& g, std::vector<Graph>& sg_vec,\
                           std::vector<int>& partition,\
                           int partID, VtxType& pCenter, WgtType& pRadius);
 void add_p_graph_edges(PGraph::PGraph& pg, Graph::Graph& g);
-int create_pgraph(PGraph::PGraph& pg, std::vector<Graph>& sg_vec,\
+int create_small_graph_list(PGraph::PGraph& pg, std::vector<Graph>& sg_vec,\
     Graph::Graph& g, std::vector<int>& partition, int partNum);
 
 void match_partition_coord(std::vector<int>& partition_vtxs,\
@@ -39,13 +39,13 @@ void match_partition_coord(std::vector<int>& partition_vtxs,\
     int pCenter);
 
 
-void distance_matrix(Graph::Graph& g, DenseMat& distMat);
-
 /****************
  * Main Process *
  ****************/
-int smpor(Graph::Graph& g, PGraph::PGraph& pg,\
+int smpor(Graph::Graph& g,
     std::vector< std::vector<CoordType> >& coord,\
+    std::vector< std::vector<CoordType> >& center_coord,\
+    std::vector< WgtType >& radius,\
     std::vector<int>& partition, int partNum);
 
 #endif

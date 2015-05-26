@@ -1,4 +1,5 @@
 #include "smpor.h"
+#include "distance.h"
 
 
 /******************************************************************************
@@ -91,29 +92,29 @@ void add_p_graph_edges(PGraph::PGraph& pg, Graph::Graph& g)
 }
 
 
-int create_pgraph(PGraph::PGraph& pg, std::vector<Graph>& sg_vec,\
-    Graph::Graph& g, std::vector<int>& partition, int partNum)
+int create_small_graph_list(Graph::Graph& g, std::vector<Graph>& sg_vec,\
+    std::vector<int>& partition, int partNum)
 {
-    // [Create pgraph]
+    // Steps
     // 1) with p-center and p-radius assign
     // 2) graph-theoriatical distance will based on the p-center's distance
     //    on given graph
 
     // add p-graph's p-node
-    VtxType p_center;
-    WgtType p_radius;
-    for (int p=0; p<partNum; ++p)
-    {
-        find_p_center_radius(g, sg_vec, partition, p, p_center, p_radius);
-        pg.add_node(p_center, p_radius);
-    }
+    // VtxType p_center;
+    // WgtType p_radius;
+    // for (int p=0; p<partNum; ++p)
+    // {
+    //     find_p_center_radius(g, sg_vec, partition, p, p_center, p_radius);
+    //     pg.add_node(p_center, p_radius);
+    // }
 
-    // add p-graph's edges
-    add_p_graph_edges(pg, g);
+    // // add p-graph's edges
+    // add_p_graph_edges(pg, g);
 
-    std::cout << "pg size = " << partNum << std::endl;
-    pg.print_graph();
-    return SUCCESS_CREATE_PGRAPH;
+    // std::cout << "pg size = " << partNum << std::endl;
+    // pg.print_graph();
+    return SUCCESS_CREATE_SMALL_GRAPH_LIST;
 }
 
 
@@ -215,22 +216,6 @@ int stress_majorization_with_node_overlap_removal(PGraph::PGraph& pg,\
  *                       Stress Majorization                                  *
  *                    of small graph components                               *
  ******************************************************************************/
-void distance_matrix(Graph::Graph& g, DenseMat& distMat)
-{
-    
-    int g_size = g.get_num_vtxs();
-    std::vector<WgtType> dist(g_size);
-
-    for (int v=0; v<g_size; ++v)
-    {
-        bfs(g, g_size, v, dist);
-        distMat.row(v) = MapVec(&dist[0], dist.size());
-    }
-
-
-}
-
-
 void match_partition_coord(std::vector<int>& partition_vtxs,\
     std::vector< std::vector<CoordType> >& partition_coords,\
     std::vector< std::vector<CoordType> >& pg_coord,\
@@ -345,15 +330,23 @@ int stress_majorization_of_small_graph(std::vector<Graph>& sg_vec,\
 /******************************************************************************
  *                           Main Process                                     *
  ******************************************************************************/
-int smpor(Graph::Graph& g, PGraph::PGraph& pg,\
+int smpor(Graph::Graph& g,
     std::vector< std::vector<CoordType> >& coord,\
+    std::vector< std::vector<CoordType> >& center_coord,\
+    std::vector< WgtType >& radius,\
     std::vector<int>& partition, int partNum)
 {
 
     std::vector<Graph> sg_vec(partNum, Graph(0));
 
-    // stage 
-    create_pgraph(pg, sg_vec, g, partition, partNum);
+    // Steps
+    // 1. stress majorization inside clusters.
+    // 2. get the radii and centers coordinates.
+    // 3. stress majorization between clusters.
+    // 4. shift nodes with cluster respect to the centers.
+
+    // Step 1
+    create_small_graph_list(g, sg_vec, partition, partNum);
 
 
 
@@ -365,8 +358,8 @@ int smpor(Graph::Graph& g, PGraph::PGraph& pg,\
 
     // matching the partition coordinates to the overall coordinates
     // partition graph for easily p-center
-    stress_majorization_of_small_graph(sg_vec, pg, partition, pg_coord,\
-                                       coord, partNum);
+    // stress_majorization_of_small_graph(sg_vec, pg, partition, pg_coord,\
+    //                                    coord, partNum);
 
     return SUCCESS_SMPOR;
 
