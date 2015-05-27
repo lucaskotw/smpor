@@ -115,7 +115,7 @@ int get_radii_centers(std::vector<int>& clusters, int nCluster,\
     std::vector< std::vector<CoordType> > intra_coord;
     std::vector<CoordType> vtx_coord(2);
     std::vector<CoordType> center(2);
-    WgtType radius = -1; // radius default value
+    WgtType radius; // radius default value
     WgtType candi_radius; // candidate radius value
 
     for (int p=0; p<nCluster; ++p)
@@ -136,6 +136,7 @@ int get_radii_centers(std::vector<int>& clusters, int nCluster,\
         // loop step 2
         center.clear();
         center.resize(2, 0.0);
+        radius = -1;
 
         for (int i=0; i<intra_coord.size(); ++i)
         {

@@ -106,7 +106,7 @@ int bfs_create_clusters_graph(Graph::Graph& g, int gSize, VtxType s,\
                      (adj_mat.at(adj_c).at(cur_c) == 0) &&\
                      cur_c != adj_c)
                 {
-                    wgt = radii.at(cur_c) + radii.at(adj_c);
+                    wgt = (radii.at(cur_c) + radii.at(adj_c)) * 1.1; // 1.1 is the offset
                     cg.add_edge(cur_c, adj_c, wgt);
                     adj_mat.at(cur_c).at(adj_c) = 1;
                     adj_mat.at(adj_c).at(cur_c) = 1;

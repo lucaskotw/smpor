@@ -28,6 +28,12 @@ double get_drawing_width(std::vector< std::vector<CoordType> >& coord)
             // if ( absolute( *itc ) > max_width) max_width = *itc;
         }
     }
+
+
+    // [star] change!
+    max_width = 5;
+
+
     return max_width;
 }
 
@@ -54,7 +60,7 @@ void draw_vertices(std::vector< std::vector<CoordType> >& coord, \
     std::vector<PartType>& partition)
 {
   double coord_max = get_drawing_width(coord);
-  // std::cout << coord_max << std::endl;
+
 
   glBegin(GL_POINTS);
 
