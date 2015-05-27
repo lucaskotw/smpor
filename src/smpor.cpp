@@ -169,8 +169,8 @@ static
 int inter_stress_majorization(Graph::Graph& g,\
     std::vector< std::vector<CoordType> >& center_coord,\
     std::vector< WgtType >& radii,\
-    std::vector< std::vector<CoordType> >& new_center_coord,\
-    std::vector<int>& clusters, int nCluster)
+    std::vector<int>& clusters, int nCluster,\
+    std::vector< std::vector<CoordType> >& new_center_coord)
 {
     // Steps (whether the first step has improvement? sort node first?)
     // 1. Create the Graph correspond to the centers
@@ -197,38 +197,60 @@ int inter_stress_majorization(Graph::Graph& g,\
                         new_center_coord);
 
     // Step 4
-    std::vector<CoordType> cg_center(2);
+    std::vector<CoordType> new_center(2);
     for (int i=0; i<new_center_coord.size(); ++i)
     {
-        cg_center.at(0) += new_center_coord.at(i).at(0);
-        cg_center.at(1) += new_center_coord.at(i).at(1);
+        new_center.at(0) += new_center_coord.at(i).at(0);
+        new_center.at(1) += new_center_coord.at(i).at(1);
     }    
-    cg_center.at(0) /= new_center_coord.size();
-    cg_center.at(1) /= new_center_coord.size();
+    new_center.at(0) /= new_center_coord.size();
+    new_center.at(1) /= new_center_coord.size();
 
-    for (int i=0; i<new_center_coord.size(); ++i)
+    for (int i=0; i<center_coord.size(); ++i)
     {
-        new_center_coord.at(i).at(0) -= cg_center.at(0);
-        new_center_coord.at(i).at(1) -= cg_center.at(1);
-    }
-
-
-    std::cout << "new center coord" << std::endl;
-    for (std::vector< std::vector<CoordType> >::iterator it1=new_center_coord.begin();\
-        it1!=new_center_coord.end();
-        ++it1)
-    {
-        for (std::vector<CoordType>::iterator it2=(*it1).begin();\
-        it2!=(*it1).end();
-        ++it2)
-        {
-            std::cout << *it2 << " ";
-        }
-        std::cout << std::endl;
+        new_center_coord.at(i).at(0) -= new_center.at(0);
+        new_center_coord.at(i).at(1) -= new_center.at(1);
     }
 
 
     return SUCCESS_INTER_STRESS_MAJORIZATION;
+}
+
+
+/******************************************************************************
+ *                 Stress Majorization Between Clusters                       *
+ ******************************************************************************/
+static
+int shift_intra_cluster_vertices(std::vector<int>& clusters,\
+    std::vector< std::vector<CoordType> >& new_center_coord,\
+    std::vector< std::vector<CoordType> >& center_coord,\
+    std::vector< std::vector<CoordType> >& coord)
+{
+    // Steps
+    // 1. get the distance difference between old center of each vtxs
+    // 2. shift based on new center_coord
+
+    // Step 1
+    int vtx_c;
+    std::vector< std::vector<CoordType> > coord_diff(coord.size(),\
+                                                std::vector<CoordType>(2, 0));
+
+    for (int i=0; i<coord.size(); ++i)
+    {
+        vtx_c = clusters.at(i);
+        coord_diff.at(i).at(0) = coord.at(i).at(0) - center_coord.at(vtx_c).at(0);
+        coord_diff.at(i).at(1) = coord.at(i).at(1) - center_coord.at(vtx_c).at(1);
+    }
+
+    // Step 2
+    for (int i=0; i<coord.size(); ++i)
+    {
+        vtx_c = clusters.at(i);
+        coord.at(i).at(0) = new_center_coord.at(vtx_c).at(0) + coord_diff.at(i).at(0);
+        coord.at(i).at(1) = new_center_coord.at(vtx_c).at(1) + coord_diff.at(i).at(1);
+    }
+
+    return SUCCESS_SHIFT_INTRA_CLUSTER;
 }
 
 
@@ -247,6 +269,7 @@ int smpor(Graph::Graph& g, int graphSize, DenseMat& distMat,\
     // 2. get the radii and centers coordinates.
     // 3. stress majorization between clusters.
     // 4. shift vertices within cluster respect to the centers.
+    // 5. replace the old center coord by new center coord
 
     // Step 1
     intra_stress_majorization(clusters, nCluster, distMat, coord);
@@ -255,13 +278,20 @@ int smpor(Graph::Graph& g, int graphSize, DenseMat& distMat,\
     get_radii_centers(clusters, nCluster, coord, radii, center_coord);
 
     // Step 3
-    std::vector< std::vector<CoordType> > new_center_coord(3,\
-                                            std::vector<CoordType>(2));
-    inter_stress_majorization(g, center_coord, radii, new_center_coord,\
-        clusters, nCluster);
+    std::vector< std::vector<CoordType> > new_center_coord(nCluster,\
+                                                std::vector<CoordType>(2));
+    inter_stress_majorization(g, center_coord, radii, clusters, nCluster,\
+        new_center_coord);
 
     // Step 4
-    // shift_intra_cluster_vertices(center_coord, new_center_coord, coord);
+    shift_intra_cluster_vertices(clusters, new_center_coord, center_coord, coord);
+
+    // Step 5
+    for (int i=0; i<center_coord.size(); ++i)
+    {
+        center_coord.at(i).at(0) = new_center_coord.at(i).at(0);
+        center_coord.at(i).at(1) = new_center_coord.at(i).at(1);
+    }
 
 
     return SUCCESS_SMPOR;

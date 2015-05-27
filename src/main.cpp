@@ -7,7 +7,7 @@
 #include <ctime> 
 
 
-#define CLUSTER_NUM 4
+#define CLUSTER_NUM 3
 #define DRAWING_DIM   2
 
 
@@ -92,24 +92,23 @@ int main(int argc, char** argv)
     std::vector< std::vector<CoordType> > coord(g.get_num_vtxs(),\
                                                 std::vector<CoordType>(DRAWING_DIM));
 
-    std::vector< std::vector<CoordType> > center_coord(3); // 3 stands for
-                                                           // clusters number
-    std::vector< WgtType > radii(3);
+    std::vector< std::vector<CoordType> > center_coord(CLUSTER_NUM);
+    std::vector< WgtType > radii(CLUSTER_NUM);
     smpor(g, g.get_num_vtxs(), dist_mat, coord, center_coord, radii, clusters, 3);
 
-    // std::cout << "smpor coord" << std::endl;
-    // for (std::vector< std::vector<CoordType> >::iterator it1=coord.begin();\
-    //     it1!=coord.end();
-    //     ++it1)
-    // {
-    //     for (std::vector<CoordType>::iterator it2=(*it1).begin();\
-    //     it2!=(*it1).end();
-    //     ++it2)
-    //     {
-    //         std::cout << *it2 << " ";
-    //     }
-    //     std::cout << std::endl;
-    // }
+    std::cout << "smpor coord" << std::endl;
+    for (std::vector< std::vector<CoordType> >::iterator it1=coord.begin();\
+        it1!=coord.end();
+        ++it1)
+    {
+        for (std::vector<CoordType>::iterator it2=(*it1).begin();\
+        it2!=(*it1).end();
+        ++it2)
+        {
+            std::cout << *it2 << " ";
+        }
+        std::cout << std::endl;
+    }
 
     std::cout << "center coord" << std::endl;
     for (std::vector< std::vector<CoordType> >::iterator it1=center_coord.begin();\
@@ -125,22 +124,22 @@ int main(int argc, char** argv)
         std::cout << std::endl;
     }
 
-    // std::cout << "radius" << std::endl;
-    // for (std::vector<CoordType>::iterator it=radii.begin();\
-    // it!=radii.end();
-    // ++it)
-    // {
-    //     std::cout << *it << " ";
-    // }
-    // std::cout << std::endl;
+    std::cout << "radius" << std::endl;
+    for (std::vector<CoordType>::iterator it=radii.begin();\
+    it!=radii.end();
+    ++it)
+    {
+        std::cout << *it << " ";
+    }
+    std::cout << std::endl;
 
     // /* port and boundary assignment - create edges */
-    // std::vector< std::vector<VtxType> > edges;
-    // std::vector< std::vector<VtxType> > ports;
-    // std::vector< std::vector<VtxType> > boundary_pts;
-    // std::vector< std::vector<CoordType> > ports_coords;
-    // std::vector< std::vector<CoordType> > boundary_pts_coords;
-    // std::vector< std::vector<CoordType> > ctrl_pts_coords;
+    std::vector< std::vector<VtxType> > edges;
+    std::vector< std::vector<VtxType> > ports;
+    std::vector< std::vector<VtxType> > boundary_pts;
+    std::vector< std::vector<CoordType> > ports_coords;
+    std::vector< std::vector<CoordType> > boundary_pts_coords;
+    std::vector< std::vector<CoordType> > ctrl_pts_coords;
     // port_and_boundary_assignment(g, pg, clusters, coord, \
     //     edges, ports, boundary_pts, ports_coords, boundary_pts_coords,\
     //     ctrl_pts_coords);
@@ -165,9 +164,9 @@ int main(int argc, char** argv)
 
     /* Draw the Layout*/
 
-    // draw_layout(edges, coord, clusters, ports, boundary_pts,\
-    //     ports_coords, boundary_pts_coords, ctrl_pts_coords,\
-    //     centers, radius);
+    draw_layout(edges, coord, clusters, ports, boundary_pts,\
+        ports_coords, boundary_pts_coords, ctrl_pts_coords,\
+        center_coord, radii);
 
     /* Show the elapsed time */    
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;

@@ -301,7 +301,7 @@ void draw_layout(std::vector< std::vector<VtxType> >& edges, \
     glClearColor( 1.0f, 1.0f, 1.0f, 1.0f );
     glClear(GL_COLOR_BUFFER_BIT);
 
-    draw_edges(edges, coord, ports, boundary_pts, ports_coords, boundary_pts_coords, ctrl_pts_coords);
+    // draw_edges(edges, coord, ports, boundary_pts, ports_coords, boundary_pts_coords, ctrl_pts_coords);
     draw_vertices(coord, partition);
 
     // for seeing the radius of partition
