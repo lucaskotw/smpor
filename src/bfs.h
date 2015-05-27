@@ -6,7 +6,7 @@
 #include "graph.h"
 #include "pgraph.h"
 #include <vector>
-#include <queue>
+
 
 
 #define VTX_NOT_CONNECTED -1
@@ -15,7 +15,9 @@
 
 
 int bfs(Graph::Graph& g, int gSize, VtxType s, std::vector<WgtType>& dist);
-int bfs_pg(PGraph::PGraph& pg, int pgSize, VtxType s, std::vector<WgtType>& dist);
+int bfs_create_clusters_graph(Graph::Graph& g, int gSize, VtxType s,\
+    std::vector< WgtType >& radii,\
+    std::vector<int>& clusters, int nCluster, Graph::Graph& cg);
 
 
 #endif

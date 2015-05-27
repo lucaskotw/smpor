@@ -39,6 +39,7 @@
 #define SUCCESS_CLUSTER_PLACEMENT   0
 #define SUCCESS_INTRA_STRESS_MAJORIZATION 0
 #define SUCCESS_GET_RADII_CENTERS 0
+#define SUCCESS_INTER_STRESS_MAJORIZATION 0
 #define SUCCESS_SM_PG                 0
 #define SUCCESS_SM                    0
 #define SUCCESS_SMPOR                 0

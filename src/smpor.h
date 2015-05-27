@@ -25,7 +25,7 @@
 /****************
  * Main Process *
  ****************/
-int smpor(int graphSize, DenseMat& distMat,\
+int smpor(Graph::Graph& g, int graphSize, DenseMat& distMat,\
     std::vector< std::vector<CoordType> >& coord,\
     std::vector< std::vector<CoordType> >& center_coord,\
     std::vector< WgtType >& radii,\

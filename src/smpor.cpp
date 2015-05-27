@@ -4,8 +4,7 @@
 
 
 /******************************************************************************
- *                       Stress Majorization                                  *
- *                         inside clusters                                    *
+ *                 Stress Majorization inside clusters                        *
  ******************************************************************************/
 static
 void create_cluster_dist_mat(DenseMat& distMat,\
@@ -137,14 +136,7 @@ int get_radii_centers(std::vector<int>& clusters, int nCluster,\
         // loop step 2
         center.clear();
         center.resize(2, 0.0);
-        std::cout << "current center" << std::endl;
-        for (std::vector<CoordType>::iterator it=center.begin();\
-    it!=center.end();
-    ++it)
-    {
-        std::cout << *it << " ";
-    }
-    std::cout << std::endl;
+
         for (int i=0; i<intra_coord.size(); ++i)
         {
             center.at(0) += intra_coord.at(i).at(0);
@@ -171,22 +163,90 @@ int get_radii_centers(std::vector<int>& clusters, int nCluster,\
 
 
 /******************************************************************************
+ *                 Stress Majorization Between Clusters                       *
+ ******************************************************************************/
+static
+int inter_stress_majorization(Graph::Graph& g,\
+    std::vector< std::vector<CoordType> >& center_coord,\
+    std::vector< WgtType >& radii,\
+    std::vector< std::vector<CoordType> >& new_center_coord,\
+    std::vector<int>& clusters, int nCluster)
+{
+    // Steps (whether the first step has improvement? sort node first?)
+    // 1. Create the Graph correspond to the centers
+    //     * node id will be the clusters id: O(N^2)
+    // 2. Calculate distance matrix
+    // 3. run the stress majorization of this graph
+    // 4. shift the new center coordinates to new position, where the origin is
+    //    the `center' point of the centers
+
+    int cg_size = center_coord.size();
+    // Step 1
+    Graph cg(cg_size);
+    bfs_create_clusters_graph(g, g.get_num_vtxs(), 0, radii,\
+        clusters, nCluster, cg);
+
+    // Step 2
+    DenseMat cDistMat(cg_size, cg_size);
+    distance_matrix(cg, cDistMat);
+    std::cout << "cluster graph distance matrix" << std::endl;
+    std::cout << cDistMat << std::endl;
+
+    // Step 3
+    stress_majorization(cDistMat.rows(), cDistMat,\
+                        new_center_coord);
+
+    // Step 4
+    std::vector<CoordType> cg_center(2);
+    for (int i=0; i<new_center_coord.size(); ++i)
+    {
+        cg_center.at(0) += new_center_coord.at(i).at(0);
+        cg_center.at(1) += new_center_coord.at(i).at(1);
+    }    
+    cg_center.at(0) /= new_center_coord.size();
+    cg_center.at(1) /= new_center_coord.size();
+
+    for (int i=0; i<new_center_coord.size(); ++i)
+    {
+        new_center_coord.at(i).at(0) -= cg_center.at(0);
+        new_center_coord.at(i).at(1) -= cg_center.at(1);
+    }
+
+
+    std::cout << "new center coord" << std::endl;
+    for (std::vector< std::vector<CoordType> >::iterator it1=new_center_coord.begin();\
+        it1!=new_center_coord.end();
+        ++it1)
+    {
+        for (std::vector<CoordType>::iterator it2=(*it1).begin();\
+        it2!=(*it1).end();
+        ++it2)
+        {
+            std::cout << *it2 << " ";
+        }
+        std::cout << std::endl;
+    }
+
+
+    return SUCCESS_INTER_STRESS_MAJORIZATION;
+}
+
+
+/******************************************************************************
  *                           Main Process                                     *
  ******************************************************************************/
-int smpor(int graphSize, DenseMat& distMat,\
+int smpor(Graph::Graph& g, int graphSize, DenseMat& distMat,\
     std::vector< std::vector<CoordType> >& coord,\
     std::vector< std::vector<CoordType> >& center_coord,\
     std::vector< WgtType >& radii,\
-    std::vector<int>&  clusters, int nCluster)
+    std::vector<int>& clusters, int nCluster)
 {
-
-    std::vector<Graph> sg_vec(nCluster, Graph(0));
 
     // Steps
     // 1. stress majorization inside clusters.
     // 2. get the radii and centers coordinates.
     // 3. stress majorization between clusters.
-    // 4. shift nodes with cluster respect to the centers.
+    // 4. shift vertices within cluster respect to the centers.
 
     // Step 1
     intra_stress_majorization(clusters, nCluster, distMat, coord);
@@ -194,18 +254,15 @@ int smpor(int graphSize, DenseMat& distMat,\
     // Step 2
     get_radii_centers(clusters, nCluster, coord, radii, center_coord);
 
+    // Step 3
+    std::vector< std::vector<CoordType> > new_center_coord(3,\
+                                            std::vector<CoordType>(2));
+    inter_stress_majorization(g, center_coord, radii, new_center_coord,\
+        clusters, nCluster);
 
+    // Step 4
+    // shift_intra_cluster_vertices(center_coord, new_center_coord, coord);
 
-    // // draw the layout of p-graph: give the coordinates
-    // std::vector< std::vector<CoordType> > pg_coord(pg.get_num_vtxs(),\
-    //                                     std::vector<CoordType> (2, INIT_COORD));
-    // stress_majorization_with_node_overlap_removal(pg, pg_coord);
-
-
-    // matching the clusters coordinates to the overall coordinates
-    // clusters graph for easily p-center
-    // intra_stress_majorization(sg_vec, pg, clusters, pg_coord,\
-    //                                    coord, nCluster);
 
     return SUCCESS_SMPOR;
 

@@ -30,7 +30,7 @@ int main(int argc, char** argv)
     /* Load the Graph*/
     Graph g(0);
     load_graph_from_mm(argv[1], g);
-    // g.print_graph();
+    g.print_graph();
 
     // create distance matrix
     DenseMat dist_mat(g.get_num_vtxs(), g.get_num_vtxs());
@@ -95,21 +95,21 @@ int main(int argc, char** argv)
     std::vector< std::vector<CoordType> > center_coord(3); // 3 stands for
                                                            // clusters number
     std::vector< WgtType > radii(3);
-    smpor(g.get_num_vtxs(), dist_mat, coord, center_coord, radii, clusters, 3);
+    smpor(g, g.get_num_vtxs(), dist_mat, coord, center_coord, radii, clusters, 3);
 
-    std::cout << "smpor coord" << std::endl;
-    for (std::vector< std::vector<CoordType> >::iterator it1=coord.begin();\
-        it1!=coord.end();
-        ++it1)
-    {
-        for (std::vector<CoordType>::iterator it2=(*it1).begin();\
-        it2!=(*it1).end();
-        ++it2)
-        {
-            std::cout << *it2 << " ";
-        }
-        std::cout << std::endl;
-    }
+    // std::cout << "smpor coord" << std::endl;
+    // for (std::vector< std::vector<CoordType> >::iterator it1=coord.begin();\
+    //     it1!=coord.end();
+    //     ++it1)
+    // {
+    //     for (std::vector<CoordType>::iterator it2=(*it1).begin();\
+    //     it2!=(*it1).end();
+    //     ++it2)
+    //     {
+    //         std::cout << *it2 << " ";
+    //     }
+    //     std::cout << std::endl;
+    // }
 
     std::cout << "center coord" << std::endl;
     for (std::vector< std::vector<CoordType> >::iterator it1=center_coord.begin();\
@@ -125,14 +125,14 @@ int main(int argc, char** argv)
         std::cout << std::endl;
     }
 
-    std::cout << "radius" << std::endl;
-    for (std::vector<CoordType>::iterator it=radii.begin();\
-    it!=radii.end();
-    ++it)
-    {
-        std::cout << *it << " ";
-    }
-    std::cout << std::endl;
+    // std::cout << "radius" << std::endl;
+    // for (std::vector<CoordType>::iterator it=radii.begin();\
+    // it!=radii.end();
+    // ++it)
+    // {
+    //     std::cout << *it << " ";
+    // }
+    // std::cout << std::endl;
 
     // /* port and boundary assignment - create edges */
     // std::vector< std::vector<VtxType> > edges;
