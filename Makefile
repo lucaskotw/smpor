@@ -5,8 +5,8 @@ CXX = g++
 LINKER = g++ -o
 DEBUG = -g
 CFLAGS = -Wall -c $(DEBUG)
-LFLAGS = -Wall -framework OpenGL -lglfw3 $(DEBUG)
-IPATHS = -I/usr/local/Cellar/eigen/3.2.4/include/eigen3/ -I/usr/local/include -I/opt/X11/include -I/usr/local/Cellar/devil/1.7.8_1/include/
+LFLAGS = -Wall -framework OpenGL -lglfw3 -ligraph $(DEBUG)
+IPATHS = -I/usr/local/Cellar/eigen/3.2.4/include/eigen3/ -I/usr/local/include -I/opt/X11/include -I/usr/local/Cellar/devil/1.7.8_1/include/ -I/usr/local/Cellar/igraph/0.7.1/include/
 LPATHS = -L/usr/local/lib -L/opt/X11/lib
 
 # Modifed Makefile after understanding needed makefile knowledge

@@ -4,7 +4,6 @@
 #include "config.h"
 #include "eigenmat.h"
 #include "graph.h"
-#include "pgraph.h"
 
 
 #include "bfs.h"

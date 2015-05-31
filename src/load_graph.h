@@ -9,6 +9,9 @@ extern "C"
 #include <fstream>
 #include "graph.h"
 
+#include <igraph/igraph.h>
+
+
 /* move to main.cpp */
 #define FAIL_OPEN_FILE         2
 #define FAIL_READ_FILE_HEADER  3
@@ -20,9 +23,8 @@ extern "C"
 #define FILE_BUFFER_SIZE       256
 
 
-int read_edge_from_input(char* buff, int buffSize, \
-    VtxType& u, VtxType& v, WgtType& pWgt);
 int load_graph_from_mm (char* filePath, Graph::Graph& g);
+int load_graph_from_gml(char* filePath, Graph::Graph& g);
 
 
 #endif

@@ -1,6 +1,7 @@
 #include "load_graph.h"
 
 
+static
 int read_edge_from_input(char * buff, int buffSize, \
     VtxType & u, VtxType & v, WgtType & pWgt)
 {
@@ -84,6 +85,33 @@ int load_graph_from_mm(char* filePath, Graph::Graph& g)
             g.add_edge(u-1, v-1, pWgt);
         }   
     }
+
+    return SUCCESS_CREATE_GRAPH;
+    
+}
+
+
+/******************************************************************************
+ *     Load the data from Graph Modeling Language to Graph data structure     *
+ ******************************************************************************/
+
+
+int load_graph_from_gml(char* filePath, Graph::Graph& g)
+{
+    FILE * f;
+
+    // error handling while fopen
+    if ((f = fopen(filePath, "r")) == NULL)
+    {
+        return FAIL_OPEN_FILE;
+    }
+
+    std::cout << f << std::endl;
+
+    igraph_t ig;
+    igraph_read_graph_graphml(&ig, f, 0);
+
+    fclose(f);
 
     return SUCCESS_CREATE_GRAPH;
     

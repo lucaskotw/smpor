@@ -149,16 +149,16 @@ void draw_edges(std::vector< std::vector<VtxType> >& edges, \
     pt1 = edges.at(i).at(0);
     pt2 = edges.at(i).at(1);
     // draw those edges that doesn't have ports and boundary
-    if (ports.at(i).at(0) == NULL_PORT)
-    {
+    // if (ports.at(i).at(0) == NULL_PORT)
+    // {
 
       draw_line(coord.at(pt1).at(0)/coord_max, coord.at(pt1).at(1)/coord_max,\
                 coord.at(pt2).at(0)/coord_max, coord.at(pt2).at(1)/coord_max);
-    }
+    // }
 
     // draw those edges with ports and boundary
-    else
-    {
+    // else
+    // {
 
       // // pt1 to b-pt1
       // ++cnt;
@@ -196,7 +196,7 @@ void draw_edges(std::vector< std::vector<VtxType> >& edges, \
       //           boundary_pts_coords.at(cnt).at(1)/coord_max,\
       //           coord.at(pt2).at(0)/coord_max,\
       //           coord.at(pt2).at(1)/coord_max);
-    }
+    // }
   }
 
   
@@ -307,7 +307,7 @@ void draw_layout(std::vector< std::vector<VtxType> >& edges, \
     glClearColor( 1.0f, 1.0f, 1.0f, 1.0f );
     glClear(GL_COLOR_BUFFER_BIT);
 
-    // draw_edges(edges, coord, ports, boundary_pts, ports_coords, boundary_pts_coords, ctrl_pts_coords);
+    draw_edges(edges, coord, ports, boundary_pts, ports_coords, boundary_pts_coords, ctrl_pts_coords);
     draw_vertices(coord, partition);
 
     // for seeing the radius of partition

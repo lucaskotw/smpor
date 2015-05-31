@@ -4,7 +4,6 @@
 #include "config.h"
 #include "eigenmat.h"
 #include "graph.h"
-#include "pgraph.h"
 #include "lap.h"
 
 
@@ -13,6 +12,10 @@
 
 // double stress(DenseMat & distMat, std::vector< std::vector<CoordType> >& coord);
 int stress_majorization(int graphSize,\
+                        DenseMat& distMat,\
+                        std::vector< std::vector<CoordType> >& coord);
+
+int stress_majorization_radial_refinement(int graphSize,\
                         DenseMat& distMat,\
                         std::vector< std::vector<CoordType> >& coord);
 
