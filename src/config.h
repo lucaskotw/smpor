@@ -49,5 +49,6 @@
 /* ports and boundary assignment stage */
 #define SUCCESS_PBA  0
 #define SUCCESS_CTRL 0
+#define SUCCESS_LAYOUT_REFINEMENT 0;
 
 #endif

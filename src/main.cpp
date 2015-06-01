@@ -131,7 +131,7 @@ int main(int argc, char** argv)
     // // port_and_boundary_assignment(g, pg, clusters, coord, \
     // //     edges, ports, boundary_pts, ports_coords, boundary_pts_coords,\
     // //     ctrl_pts_coords);
-    layout_refinement(g, dist_mat, clusters, CLUSTER_NUM, coord);
+    layout_refinement(g, dist_mat, clusters, CLUSTER_NUM, center_coord, radii, coord);
 
 
     /* Ended of the elapsed time measure */
