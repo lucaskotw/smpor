@@ -29,77 +29,149 @@ int stress_majorization(int graphSize,\
     // 3. Majorization
     //     * Pick the first node as reference point
     // 4. map Eigen matrix to coord
+    // Deal with situation with only two vtxs
 
     int g_size = graphSize;
-    // Step 1
-    DenseMat coord_mat(g_size, 2);
-    for (int c=0; c<coord_mat.cols(); c++)
+    if (g_size <= 2)
     {
-        for (int r=0; r<coord_mat.rows(); ++r)
+        // Step 1
+        DenseMat coord_mat(g_size, 2);
+        for (int c=0; c<coord_mat.cols(); c++)
         {
-            coord_mat(r, c) = rand()%100/50.0;
+            for (int r=0; r<coord_mat.rows(); ++r)
+            {
+                coord_mat(r, c) = rand()%100/50.0;
+            }
         }
-    }
 
-    // Step 2
-    DenseMat w_lap(g_size, g_size);
-    w_lap_normal(g_size, distMat, w_lap);
+        // Step 2: cooresponding intuitive move
+        double stress_ratio = 0.0;
+        double pre_stress = stress(distMat, coord_mat);
+        DenseMat w_lap(g_size, g_size);
+        w_lap_normal(g_size, distMat, w_lap);
+        std::cout << "previous stress=" << pre_stress << std::endl;
 
+        coord_mat(1, 0) = coord_mat(0, 0) +\
+            distMat(0, 1)*(coord_mat(1, 0) -  coord_mat(0, 0))\
+            / std::sqrt(std::pow(coord_mat(1, 0) - coord_mat(0, 0), 2) + std::pow(coord_mat(1, 1) - coord_mat(0, 1), 2));
+        coord_mat(1, 1) = coord_mat(0, 1) +\
+            distMat(0, 1)*(coord_mat(1, 1) -  coord_mat(0, 1))\
+            / std::sqrt(std::pow(coord_mat(1, 0) - coord_mat(0, 0), 2) + std::pow(coord_mat(1, 1) - coord_mat(0, 1), 2));
 
-    // Step 3
-    // First Iteration
-    double stress_ratio = 0.0;
-    double pre_stress = stress(distMat, coord_mat);
-    DenseMat iter_coord(graphSize-1, 2);
-    iter_coord = coord_mat.block(1, 0, coord_mat.rows()-1, coord_mat.cols());
-    iter_coord = w_lap.block(1, 1, w_lap.rows()-1, w_lap.cols()-1).ldlt().solve(iter_coord);
-    coord_mat.fill(0);  // refill coord_mat for next iteration
-    coord_mat.block(1, 0, coord_mat.rows()-1, coord_mat.cols()) = iter_coord;
-    double aft_stress = stress(distMat, coord_mat);
-    stress_ratio = (pre_stress-aft_stress)/pre_stress;
-    // std::cout << "round 0 previous stress = " << pre_stress << std::endl;
-    // std::cout << "round 0 after stress = " << aft_stress << std::endl;
-    // std::cout << "ratio = " << stress_ratio << std::endl;
-
-
-    double epsl = SM_THRESHOLD;
-    
-    DenseMat i_lap(w_lap.rows(), w_lap.cols());
-    DenseMat p_sol;
-    int i = 1;
-    
-    while ( true ) {
-        iter_lap_normal(g_size, distMat, i_lap, coord_mat);
-
-        p_sol = i_lap * coord_mat;
-        iter_coord = w_lap.block(1, 1, i_lap.rows()-1, i_lap.cols()-1)\
-            .ldlt().solve(p_sol.block(1, 0, coord_mat.rows()-1, coord_mat.cols()));
-
-        // assign preStress based on current iteration
-        pre_stress = aft_stress;
-        coord_mat.fill(0);
-        coord_mat.block(1, 0, coord_mat.rows()-1, coord_mat.cols()) = iter_coord;
-        // assign aftStress after coord assign
-        aft_stress = stress(distMat, coord_mat);
-        
+        double aft_stress = stress(distMat, coord_mat);
         stress_ratio = (pre_stress-aft_stress)/pre_stress;
-        // std::cout << "round " << i << " stress = " << aft_stress << std::endl;
-        // std::cout << "ratio = " << (pre_stress-aft_stress)/pre_stress << std::endl;
+        std::cout << "round 0 previous stress = " << pre_stress << std::endl;
+        std::cout << "round 0 after stress = " << aft_stress << std::endl;
+        std::cout << "ratio = " << stress_ratio << std::endl;
 
-        if (stress_ratio < epsl) {
-            break;
+        int i = 1;
+        double epsl = SM_THRESHOLD;
+        while ( true ) {
+            
+            // assign preStress based on current iteration
+            pre_stress = aft_stress;
+            coord_mat(1, 0) = coord_mat(0, 0) +\
+            distMat(0, 1)*(coord_mat(1, 0) -  coord_mat(0, 0))\
+            / std::sqrt(std::pow(coord_mat(1, 0) - coord_mat(0, 0), 2) + std::pow(coord_mat(1, 1) - coord_mat(0, 1), 2));
+        coord_mat(1, 1) = coord_mat(0, 1) +\
+            distMat(0, 1)*(coord_mat(1, 1) -  coord_mat(0, 1))\
+            / std::sqrt(std::pow(coord_mat(1, 0) - coord_mat(0, 0), 2) + std::pow(coord_mat(1, 1) - coord_mat(0, 1), 2));
+            aft_stress = stress(distMat, coord_mat);
+            
+            stress_ratio = (pre_stress-aft_stress)/pre_stress;
+            std::cout << "round " << i << " stress = " << aft_stress << std::endl;
+            std::cout << "ratio = " << (pre_stress-aft_stress)/pre_stress << std::endl;
+
+            if (stress_ratio < epsl) {
+                break;
+            }
+            ++i;
         }
-        ++i;
-    }
 
-
-    // transform coord_mat back to pg_coord
-    for (int c=0; c<coord_mat.cols(); c++)
-    {
-        for (int r=0; r<coord_mat.rows(); ++r)
+        // transform coord_mat back to pg_coord
+        for (int c=0; c<coord_mat.cols(); c++)
         {
+            for (int r=0; r<coord_mat.rows(); ++r)
+            {
+            
+                coord.at(r).at(c) = coord_mat(r, c);
+            }
+        }
+
+
+    }
+    else
+    {
+        // Step 1
+        DenseMat coord_mat(g_size, 2);
+        for (int c=0; c<coord_mat.cols(); c++)
+        {
+            for (int r=0; r<coord_mat.rows(); ++r)
+            {
+                coord_mat(r, c) = rand()%100/50.0;
+            }
+        }
+
+        // Step 2
+        DenseMat w_lap(g_size, g_size);
+        w_lap_normal(g_size, distMat, w_lap);
+
+
+        // Step 3
+        // First Iteration
+        double stress_ratio = 0.0;
+        double pre_stress = stress(distMat, coord_mat);
+        DenseMat iter_coord(graphSize-1, 2);
+        iter_coord = coord_mat.block(1, 0, coord_mat.rows()-1, coord_mat.cols());
+        iter_coord = w_lap.block(1, 1, w_lap.rows()-1, w_lap.cols()-1).ldlt().solve(iter_coord);
+        coord_mat.fill(0);  // refill coord_mat for next iteration
+        coord_mat.block(1, 0, coord_mat.rows()-1, coord_mat.cols()) = iter_coord;
+        double aft_stress = stress(distMat, coord_mat);
+        stress_ratio = (pre_stress-aft_stress)/pre_stress;
+        std::cout << "round 0 previous stress = " << pre_stress << std::endl;
+        std::cout << "round 0 after stress = " << aft_stress << std::endl;
+        std::cout << "ratio = " << stress_ratio << std::endl;
+
+
+        double epsl = SM_THRESHOLD;
         
-            coord.at(r).at(c) = coord_mat(r, c);
+        DenseMat i_lap(w_lap.rows(), w_lap.cols());
+        DenseMat p_sol;
+        int i = 1;
+        
+        while ( true ) {
+            iter_lap_normal(g_size, distMat, i_lap, coord_mat);
+
+            p_sol = i_lap * coord_mat;
+            iter_coord = w_lap.block(1, 1, i_lap.rows()-1, i_lap.cols()-1)\
+                .ldlt().solve(p_sol.block(1, 0, coord_mat.rows()-1, coord_mat.cols()));
+
+            // assign preStress based on current iteration
+            pre_stress = aft_stress;
+            coord_mat.fill(0);
+            coord_mat.block(1, 0, coord_mat.rows()-1, coord_mat.cols()) = iter_coord;
+            // assign aftStress after coord assign
+            aft_stress = stress(distMat, coord_mat);
+            
+            stress_ratio = (pre_stress-aft_stress)/pre_stress;
+            std::cout << "round " << i << " stress = " << aft_stress << std::endl;
+            std::cout << "ratio = " << (pre_stress-aft_stress)/pre_stress << std::endl;
+
+            if (stress_ratio < epsl) {
+                break;
+            }
+            ++i;
+        }
+
+
+        // transform coord_mat back to pg_coord
+        for (int c=0; c<coord_mat.cols(); c++)
+        {
+            for (int r=0; r<coord_mat.rows(); ++r)
+            {
+            
+                coord.at(r).at(c) = coord_mat(r, c);
+            }
         }
     }
 

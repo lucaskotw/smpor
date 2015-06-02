@@ -116,3 +116,55 @@ int load_graph_from_gml(char* filePath, Graph::Graph& g)
     return SUCCESS_CREATE_GRAPH;
     
 }
+
+
+
+/******************************************************************************
+ *                Load the cluster data from cluster file                     *
+ ******************************************************************************/
+int load_cluster_from_cls(char* filePath, std::vector<int>& clusters, int& nCls)
+{
+
+    // Steps
+    // 1. get file file path
+    // 2. get the header -> indicate cluster number
+    // 3. each line will be the vtxs in cluster, separate by space
+    using namespace std;
+    stringstream ss;
+    // Step 1
+    ifstream fin(filePath);
+
+    // Step 2
+    string n_cls;
+    getline(fin, n_cls);
+    cout << n_cls << endl;
+    ss << n_cls;
+    ss >> nCls;
+
+
+    // Step 3
+    string line;
+    int vtx;
+    int c=0;
+    while ( getline(fin, line) ) {
+        if (line.empty())
+        {
+            continue; // be careful: an empty line might be read
+        }
+        else
+        {
+            ss.str("");
+            ss.clear();
+            ss << line;
+            while (ss >> vtx)
+            {
+                clusters.at(vtx-1) = c;
+            }
+            ++c;
+        }
+            
+    }
+
+    return SUCCESS_LOAD_CLUSTERS;
+    
+}

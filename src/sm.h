@@ -5,6 +5,7 @@
 #include "eigenmat.h"
 #include "graph.h"
 #include "lap.h"
+#include <math.h>
 
 
 #define SM_THRESHOLD 0.0001

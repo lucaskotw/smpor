@@ -274,6 +274,7 @@ int smpor(Graph::Graph& g, int graphSize, DenseMat& distMat,\
 
     // Step 1
     intra_stress_majorization(clusters, nCluster, distMat, coord);
+    std::cout << "intra sm finish" << std::endl;
 
     // Step 2
     get_radii_centers(clusters, nCluster, coord, radii, center_coord);

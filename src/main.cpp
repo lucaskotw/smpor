@@ -42,31 +42,32 @@ int main(int argc, char** argv)
     // /* Clusters the Graph */
 
     // NP04 sample
-    std::vector<int> clusters;
-    for (int i=0; i<6;i++)
+    std::vector<int> clusters(g.get_num_vtxs());
+    int n_cls;
+    load_cluster_from_cls(argv[2], clusters, n_cls);
+    std::cout << "clusters" << std::endl;
+    for (std::vector<int>::iterator it1=clusters.begin();\
+        it1!=clusters.end();
+        ++it1)
     {
-        clusters.push_back(0);
+        
+        std::cout << *it1 << " ";
+        
     }
-    for (int i=0; i<7;i++)
-    {
-        clusters.push_back(1);
-    }
-    for (int i=0; i<8;i++)
-    {
-        clusters.push_back(2);
-    }
+    std::cout << std::endl;
 
 
     /* SMPOR */
     std::vector< std::vector<CoordType> > coord(g.get_num_vtxs(),\
                                                 std::vector<CoordType>(DRAWING_DIM));
 
-    std::vector< std::vector<CoordType> > center_coord(CLUSTER_NUM);
+    std::vector< std::vector<CoordType> > center_coord(n_cls);
 
     std::vector< WgtType > radii(CLUSTER_NUM);
-    smpor(g, g.get_num_vtxs(), dist_mat, coord, center_coord, radii, clusters, 3);
+    smpor(g, g.get_num_vtxs(), dist_mat, coord, center_coord, radii, clusters, n_cls);
+    std::cout << "smpor finish" << std::endl;
 
-    // Onriginal Stress Majorization
+    // Original Stress Majorization
 
     std::cout << "coord" << std::endl;
     for (std::vector< std::vector<CoordType> >::iterator it1=coord.begin();\
@@ -128,10 +129,7 @@ int main(int argc, char** argv)
         }
     }
 
-    // // port_and_boundary_assignment(g, pg, clusters, coord, \
-    // //     edges, ports, boundary_pts, ports_coords, boundary_pts_coords,\
-    // //     ctrl_pts_coords);
-    layout_refinement(g, dist_mat, clusters, CLUSTER_NUM, center_coord, radii, coord);
+    layout_refinement(g, dist_mat, clusters, n_cls, center_coord, radii, coord);
 
 
     /* Ended of the elapsed time measure */
