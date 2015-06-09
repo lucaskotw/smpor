@@ -88,13 +88,22 @@ int bfs_create_clusters_graph(Graph::Graph& g, int gSize, VtxType s,\
     VtxType adj_c;                   // adj vtx's cluster
     WgtType wgt;                     // added edge's weight
 
-
+    int cnt=0;
     while(!Q.empty() && (edge_cnt <= COMPLETE_GRAPH_N_EDGES))
     {
         v = Q.front();
         Q.pop();
 
         nbors = g.adj(v);
+        std::cout << "node = " << v << std::endl;
+        std::cout << "neighbors" << std::endl;
+        for (std::vector<VtxType>::iterator it2=nbors.begin();\
+        it2!=nbors.end();
+        ++it2)
+        {
+            std::cout << *it2 << " ";
+        }
+        std::cout << std::endl;
         for (int i=0; i<nbors.size(); ++i)
         {
             if ( !explored.at(nbors.at(i)) )
@@ -114,27 +123,33 @@ int bfs_create_clusters_graph(Graph::Graph& g, int gSize, VtxType s,\
                 }
 
                 Q.push(nbors.at(i));
+                std::cout << "current node cluster = " << cur_c << std::endl;
+                std::cout << "neighbor node cluster = " << adj_c << std::endl;
                 explored.at(nbors.at(i)) = true;
                 
             }
         }
+        ++cnt;
     }
 
+    std::cout << "loop cnt = " << cnt << std::endl;
+    std::cout << "COMPLETE_GRAPH_N_EDGES = " << COMPLETE_GRAPH_N_EDGES << std::endl;
+    // cg.print_graph();
 
 
-    std::cout << "center adj mat" << std::endl;
-    for (std::vector< std::vector<VtxType> >::iterator it1=adj_mat.begin();\
-        it1!=adj_mat.end();
-        ++it1)
-    {
-        for (std::vector<VtxType>::iterator it2=(*it1).begin();\
-        it2!=(*it1).end();
-        ++it2)
-        {
-            std::cout << *it2 << " ";
-        }
-        std::cout << std::endl;
-    }
+    // std::cout << "center adj mat" << std::endl;
+    // for (std::vector< std::vector<VtxType> >::iterator it1=adj_mat.begin();\
+    //     it1!=adj_mat.end();
+    //     ++it1)
+    // {
+    //     for (std::vector<VtxType>::iterator it2=(*it1).begin();\
+    //     it2!=(*it1).end();
+    //     ++it2)
+    //     {
+    //         std::cout << *it2 << " ";
+    //     }
+    //     std::cout << std::endl;
+    // }
 
     return SUCCESS_BFS;
 }

@@ -1,4 +1,8 @@
 #include "draw_layout.h"
+#include <math.h>
+
+
+#define PI 3.14159
 
 
 /*******************
@@ -10,28 +14,59 @@ CoordType absolute(CoordType coordVal)
     else return coordVal;
 }
 
-double get_drawing_width(std::vector< std::vector<CoordType> >& coord)
+
+static
+double get_drawing_width(std::vector< std::vector<CoordType> >& centers,\
+    std::vector<WgtType>& radius)
 {
-    double max_width = MAX_WIDTH_INIT_VAL;
-    double curr_val;
-    for (std::vector< std::vector<CoordType> >::iterator itr=coord.begin();\
-        itr!=coord.end();\
-        ++itr)
+
+    using namespace std;
+    double max_width;
+    vector<WgtType> bound_candi;
+    double theta;
+    double bound;
+    for (int i=0; i<centers.size(); ++i)
     {
-        for (std::vector<CoordType>::iterator itc=(*itr).begin(); \
-            itc!=(*itr).end(); \
-            ++itc)
-        {
-            if (*itc > 0) curr_val = *itc;
-            else curr_val = -(*itc);
-            if ( curr_val > max_width) max_width = curr_val;
-            // if ( absolute( *itc ) > max_width) max_width = *itc;
-        }
+        theta = atan2( centers.at(i).at(1), centers.at(i).at(0) );
+        bound = centers.at(i).at(0)+ radius.at(i) * cos(theta);
+        bound_candi.push_back(bound);
+        bound = centers.at(i).at(1)+radius.at(i) * sin(theta);
+        bound_candi.push_back(bound);
+        // cout << bound << endl;
+        // cout << theta << endl;
+        // cout << radius.at(i)* cos(theta) << endl;
+        // cout << centers.at(i).at(0)+ radius.at(i) * cos(theta) << endl;
+        // cout << centers.at(i).at(1)+radius.at(i) * sin(theta) << endl;
+        // bound_candi.push_back(bound);
     }
+    max_width = max(\
+                  *max_element(bound_candi.begin(), bound_candi.end()),\
+                  fabs(*min_element(bound_candi.begin(), bound_candi.end()))\
+                );
+    cout << *min_element(bound_candi.begin(), bound_candi.end());
+    cout << "max width=" << max_width << endl;
+    max_width += 1; // offset
+
+    // double curr_val;
+
+    // for (std::vector< std::vector<CoordType> >::iterator itr=coord.begin();\
+    //     itr!=coord.end();\
+    //     ++itr)
+    // {
+    //     for (std::vector<CoordType>::iterator itc=(*itr).begin(); \
+    //         itc!=(*itr).end(); \
+    //         ++itc)
+    //     {
+    //         if (*itc > 0) curr_val = *itc;
+    //         else curr_val = -(*itc);
+    //         if ( curr_val > max_width) max_width = curr_val;
+    //         // if ( absolute( *itc ) > max_width) max_width = *itc;
+    //     }
+    // }
 
 
     // [star] change!
-    max_width = 5;
+    // max_width = 20;
 
 
     return max_width;
@@ -56,10 +91,10 @@ void set_points_attributes()
 /******************
  * Drawing Method *
  ******************/
-void draw_vertices(std::vector< std::vector<CoordType> >& coord, \
+void draw_vertices(double bound, std::vector< std::vector<CoordType> >& coord, \
     std::vector<PartType>& partition)
 {
-  double coord_max = get_drawing_width(coord);
+  double coord_max = bound;
 
 
   glBegin(GL_POINTS);
@@ -131,7 +166,7 @@ void draw_bezier(CoordType p1_x, CoordType p1_y,\
 /*
  * draw the edges
  */
-void draw_edges(std::vector< std::vector<VtxType> >& edges, \
+void draw_edges(double bound, std::vector< std::vector<VtxType> >& edges, \
     std::vector< std::vector<CoordType> >& coord,\
     std::vector< std::vector<VtxType> >& ports,\
     std::vector< std::vector<VtxType> >& boundary_pts,\
@@ -139,7 +174,7 @@ void draw_edges(std::vector< std::vector<VtxType> >& edges, \
     std::vector< std::vector<CoordType> >& boundary_pts_coords,\
     std::vector< std::vector<CoordType> >& ctrl_pts_coords)
 {
-  double coord_max = get_drawing_width(coord);
+  double coord_max = bound;
 
   double pt1;
   double pt2;
@@ -205,11 +240,11 @@ void draw_edges(std::vector< std::vector<VtxType> >& edges, \
 }
 
 
-void draw_radius(std::vector< std::vector<CoordType> >& coord,\
+void draw_radius(double bound, std::vector< std::vector<CoordType> >& coord,\
                  std::vector< std::vector<CoordType> >& centers,\
                  std::vector<WgtType>& radius)
 {
-  double coord_max = get_drawing_width(coord);
+  double coord_max = bound;
   double r;
   for (int c=0; c<centers.size(); ++c)
   {
@@ -248,12 +283,12 @@ void draw_radius(std::vector< std::vector<CoordType> >& coord,\
     glEnd();
 
     // draw center
-    glPointSize(20);
-    glBegin(GL_POINTS);
+    // glPointSize(20);
+    // glBegin(GL_POINTS);
 
-      glVertex2f(centers.at(c).at(0)/coord_max, centers.at(c).at(1)/coord_max);
+    //   glVertex2f(centers.at(c).at(0)/coord_max, centers.at(c).at(1)/coord_max);
 
-    glEnd();
+    // glEnd();
   }
 }
 
@@ -295,6 +330,9 @@ void draw_layout(std::vector< std::vector<VtxType> >& edges, \
 
 
   /* Loop until the user closes the window */
+
+  double screen_bounding_width = get_drawing_width(centers, radius);
+
   while (!glfwWindowShouldClose(window))
   {
     /* Render here */
@@ -307,11 +345,11 @@ void draw_layout(std::vector< std::vector<VtxType> >& edges, \
     glClearColor( 1.0f, 1.0f, 1.0f, 1.0f );
     glClear(GL_COLOR_BUFFER_BIT);
 
-    draw_edges(edges, coord, ports, boundary_pts, ports_coords, boundary_pts_coords, ctrl_pts_coords);
-    draw_vertices(coord, partition);
+    draw_edges(screen_bounding_width, edges, coord, ports, boundary_pts, ports_coords, boundary_pts_coords, ctrl_pts_coords);
+    draw_vertices(screen_bounding_width, coord, partition);
 
     // for seeing the radius of partition
-    draw_radius(coord, centers, radius);
+    draw_radius(screen_bounding_width, coord, centers, radius);
 
     
 

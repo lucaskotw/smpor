@@ -72,11 +72,20 @@ int intra_stress_majorization(std::vector<int>& clusters, int nCluster,\
         for (int i=0; i<clusters.size(); ++i)
             if (clusters.at(i) == p) cluster_vtxs.push_back(i);
         intra_coord.resize(cluster_vtxs.size(), std::vector<CoordType>(2));
+        for (int c=0; c<2; c++)
+        {
+            for (int r=0; r<intra_coord.size(); ++r)
+            {
+                intra_coord.at(r).at(c) = rand()%100/50.0;
+            }
+        }
 
         // loop step 2
         create_cluster_dist_mat(distMat, cluster_vtxs, cluster_dist_mat);
+
         stress_majorization(cluster_dist_mat.rows(), cluster_dist_mat,\
                             intra_coord);
+        std::cout << "cluster #" << p << " finish sm" << std::endl;
 
         // loop step 3
         match_cluster_coord(cluster_vtxs, intra_coord, coord);
@@ -118,13 +127,14 @@ int get_radii_centers(std::vector<int>& clusters, int nCluster,\
     WgtType radius; // radius default value
     WgtType candi_radius; // candidate radius value
 
-    for (int p=0; p<nCluster; ++p)
+    for (int c=0; c<nCluster; ++c)
     {
         // loop step 1
+        intra_coord.clear();
         intra_coord.resize(0, std::vector<CoordType>(2));
         for (int i=0; i<clusters.size(); ++i)
         {
-            if (clusters.at(i) == p)
+            if (clusters.at(i) == c)
             {
                 vtx_coord.at(0) = coord.at(i).at(0);
                 vtx_coord.at(1) = coord.at(i).at(1);
@@ -146,7 +156,7 @@ int get_radii_centers(std::vector<int>& clusters, int nCluster,\
         
         center.at(0) /= intra_coord.size();
         center.at(1) /= intra_coord.size();
-        center_coord.at(p) = center;
+        center_coord.at(c) = center;
         
         // loop step 3
         for (int i=0; i<intra_coord.size(); ++i)
@@ -154,7 +164,8 @@ int get_radii_centers(std::vector<int>& clusters, int nCluster,\
             candi_radius = normTwo(intra_coord.at(i), center);
             if (candi_radius > radius) radius = candi_radius;
         }
-        radii.at(p) = radius;
+        radii.at(c) = radius;
+        std::cout << "radius = " << radii.at(c);
 
 
     }
@@ -190,10 +201,13 @@ int inter_stress_majorization(Graph::Graph& g,\
     // Step 2
     DenseMat cDistMat(cg_size, cg_size);
     distance_matrix(cg, cDistMat);
-    std::cout << "cluster graph distance matrix" << std::endl;
-    std::cout << cDistMat << std::endl;
+    // std::cout << "cluster graph distance matrix" << std::endl;
+    // std::cout << cDistMat << std::endl;
 
     // Step 3
+    // stress_majorization(cDistMat.rows(), cDistMat,\
+    //                     new_center_coord);
+    new_center_coord = center_coord;
     stress_majorization(cDistMat.rows(), cDistMat,\
                         new_center_coord);
 
@@ -278,21 +292,45 @@ int smpor(Graph::Graph& g, int graphSize, DenseMat& distMat,\
 
     // Step 2
     get_radii_centers(clusters, nCluster, coord, radii, center_coord);
+    std::cout << "radius and center calculation finish" << std::endl;
+    // std::cout << "radius" << std::endl;
+    // for (std::vector<CoordType>::iterator it2=radii.begin();\
+    //     it2!=radii.end();
+    //     ++it2)
+    // {
+    //     std::cout << *it2 << " ";
+    // }
+    // std::cout << std::endl;
 
     // Step 3
     std::vector< std::vector<CoordType> > new_center_coord(nCluster,\
                                                 std::vector<CoordType>(2));
     inter_stress_majorization(g, center_coord, radii, clusters, nCluster,\
         new_center_coord);
+    std::cout << "inter sm finish" << std::endl;
 
     // Step 4
     shift_intra_cluster_vertices(clusters, new_center_coord, center_coord, coord);
+    std::cout << "shift vtxs finish" << std::endl;
 
     // Step 5
     for (int i=0; i<center_coord.size(); ++i)
     {
         center_coord.at(i).at(0) = new_center_coord.at(i).at(0);
         center_coord.at(i).at(1) = new_center_coord.at(i).at(1);
+    }
+    std::cout << "center coord" << std::endl;
+    for (std::vector< std::vector<CoordType> >::iterator it1=center_coord.begin();\
+        it1!=center_coord.end();
+        ++it1)
+    {
+        for (std::vector<CoordType>::iterator it2=(*it1).begin();\
+        it2!=(*it1).end();
+        ++it2)
+        {
+            std::cout << *it2 << " ";
+        }
+        std::cout << std::endl;
     }
 
 
