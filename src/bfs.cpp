@@ -95,8 +95,8 @@ int bfs_create_clusters_graph(Graph::Graph& g, int gSize, VtxType s,\
         Q.pop();
 
         nbors = g.adj(v);
-        std::cout << "node = " << v << std::endl;
-        std::cout << "neighbors" << std::endl;
+        // std::cout << "node = " << v << std::endl;
+        // std::cout << "neighbors" << std::endl;
         for (std::vector<VtxType>::iterator it2=nbors.begin();\
         it2!=nbors.end();
         ++it2)
@@ -123,8 +123,8 @@ int bfs_create_clusters_graph(Graph::Graph& g, int gSize, VtxType s,\
                 }
 
                 Q.push(nbors.at(i));
-                std::cout << "current node cluster = " << cur_c << std::endl;
-                std::cout << "neighbor node cluster = " << adj_c << std::endl;
+                // std::cout << "current node cluster = " << cur_c << std::endl;
+                // std::cout << "neighbor node cluster = " << adj_c << std::endl;
                 explored.at(nbors.at(i)) = true;
                 
             }
@@ -132,8 +132,8 @@ int bfs_create_clusters_graph(Graph::Graph& g, int gSize, VtxType s,\
         ++cnt;
     }
 
-    std::cout << "loop cnt = " << cnt << std::endl;
-    std::cout << "COMPLETE_GRAPH_N_EDGES = " << COMPLETE_GRAPH_N_EDGES << std::endl;
+    // std::cout << "loop cnt = " << cnt << std::endl;
+    // std::cout << "COMPLETE_GRAPH_N_EDGES = " << COMPLETE_GRAPH_N_EDGES << std::endl;
     // cg.print_graph();
 
 

@@ -406,9 +406,9 @@ void radial_stress_majorization(DenseMat& distMat,\
         create_cluster_dist_mat(distMat, cluster_vtxs, radii, cluster_dist_mat);
         std::cout << "cluster dist mat rows = " << cluster_dist_mat.rows() << std::endl;
         std::cout << "intra coord size = " << intra_coord.size() << std::endl;
-        stress_majorization_radial_refinement(cluster_dist_mat.rows(),\
-                            cluster_dist_mat,\
-                            intra_coord);
+        // stress_majorization_radial_refinement(cluster_dist_mat.rows(),\
+        //                     cluster_dist_mat,\
+        //                     intra_coord);
 
         
 

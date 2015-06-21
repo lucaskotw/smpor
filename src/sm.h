@@ -16,8 +16,10 @@ int stress_majorization(int graphSize,\
                         DenseMat& distMat,\
                         std::vector< std::vector<CoordType> >& coord);
 
-int stress_majorization_radial_refinement(int graphSize,\
-                        DenseMat& distMat,\
-                        std::vector< std::vector<CoordType> >& coord);
+int stress_majorization_radial_refinement(
+    int graphSize,
+    DenseMat& distMat,
+    double coeff,   // the coeff of linear combs of orig stress and constriants
+    std::vector< std::vector<CoordType> >& coord);
 
 #endif

@@ -5,6 +5,10 @@
  */
 #include <iostream>
 #include <ctime> 
+#include <fstream>
+#include <string>
+#include <regex>
+#include <time.h>
 
 
 #define CLUSTER_NUM 3
@@ -23,9 +27,8 @@ int main(int argc, char** argv)
 {
     /* Start Timer */
     using namespace std;
+
     clock_t begin = clock();
-
-
 
 
     /* Code to measure the elapsed time */
@@ -64,7 +67,9 @@ int main(int argc, char** argv)
     std::vector< std::vector<CoordType> > center_coord(n_cls);
 
     std::vector< WgtType > radii(n_cls);
-    smpor(g, g.get_num_vtxs(), dist_mat, coord, center_coord, radii, clusters, n_cls);
+    double interpolation = atof(argv[3]);
+
+    smpor(g, g.get_num_vtxs(), dist_mat, coord, center_coord, radii, clusters, n_cls, interpolation);
     std::cout << "smpor finish" << std::endl;
 
     // Original Stress Majorization
@@ -136,15 +141,43 @@ int main(int argc, char** argv)
     clock_t end = clock();
 
 
+    /* Show the elapsed time */    
+    double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+    std::cout << "elapsed time = " << elapsed_secs << " secs" << std::endl;
+
+    /* Output the information and coordinates */
+    char curr_time[100];
+    time_t t;
+    struct tm * timeinfo;
+    time (&t);
+    timeinfo = localtime (&t);
+    strftime(curr_time, 100, "%Y%m%d%H%M%S", timeinfo);
+    regex rgx(".*/(\\w+)/.*");
+    smatch match;
+    string data(argv[1]);
+    regex_search(data, match, rgx);
+    string outfile = string(curr_time) + "_" + string(match[1]) + ".out";
+    string outdir = "output/";
+    cout << outfile << endl;
+
+    fstream fo;
+    fo.open(outdir+outfile, fstream::app);
+    strftime(curr_time, 100, "%Y%m%d%H%M%S", timeinfo);
+    fo << "elapsed_secs:" << elapsed_secs << endl;
+    fo << "interpolation:" << interpolation << endl;
+    fo << "coordination:" << endl;
+    for (int i=0; i<coord.size(); ++i)
+    {
+        fo << coord.at(i).at(0) << " " << coord.at(i).at(1) << endl;
+    }
+    fo.close();
+
+
     /* Draw the Layout*/
 
     draw_layout(edges, coord, clusters, ports, boundary_pts,\
         ports_coords, boundary_pts_coords, ctrl_pts_coords,\
         center_coord, radii);
-
-    /* Show the elapsed time */    
-    double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
-    std::cout << "elapsed time = " << elapsed_secs << " secs" << std::endl;
 
     return 0;
 

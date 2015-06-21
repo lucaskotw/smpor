@@ -12,7 +12,6 @@
 
 
 #include <vector>
-#include <algorithm>  // std::find, std::max_element
 
 
 #define INIT_COORD       0
@@ -21,13 +20,15 @@
 
 
 
+
 /****************
  * Main Process *
  ****************/
-int smpor(Graph::Graph& g, int graphSize, DenseMat& distMat,\
-    std::vector< std::vector<CoordType> >& coord,\
-    std::vector< std::vector<CoordType> >& center_coord,\
-    std::vector< WgtType >& radii,\
-    std::vector<int>& clusters, int nCluster);
+int smpor(Graph::Graph& g, int graphSize, DenseMat& distMat,
+    std::vector< std::vector<CoordType> >& coord,
+    std::vector< std::vector<CoordType> >& center_coord,
+    std::vector< WgtType >& radii,
+    std::vector<int>& clusters, int nCluster,
+	double interpolation);
 
 #endif
